@@ -1,0 +1,7 @@
+# Digital business cards — one per person at /card/<name> (e.g. /card/mauricio)
+/card        /card.html   200
+/card/*      /card.html   200
+
+# Single-page app fallback: serve index.html for every path so clean URLs
+# like /collective/olgabaranova work on direct load, refresh, and share.
+/*    /index.html   200

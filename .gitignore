@@ -1,0 +1,13 @@
+# OS / tooling
+.DS_Store
+.claude/
+*.log
+# Heavy source assets — NOT part of the deployed site (films stream from Bunny)
+Olga/
+Videos/
+Splash/
+Portraits/
+Archive/
+*.mov
+*.mp4
+*.pdf

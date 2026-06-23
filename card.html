@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>MACHINA — Card</title>
+<meta name="description" content="MACHINA digital card." />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=49" />
+<style>
+  @font-face{
+    font-family:"Bebas Neue";
+    src:url("/machina3/fonts/BebasNeue-Regular.ttf") format("truetype");
+    font-weight:400; font-style:normal; font-display:swap;
+  }
+  :root{ --fg:#fff; --bg:#000; --dim:rgba(255,255,255,.55); --line:rgba(255,255,255,.25); }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; background:var(--bg); color:var(--fg); }
+  body{
+    min-height:100svh; display:flex; align-items:center; justify-content:center;
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    padding:max(34px,env(safe-area-inset-top)) 24px max(34px,env(safe-area-inset-bottom));
+    -webkit-font-smoothing:antialiased;
+  }
+  .card{ width:100%; max-width:380px; text-align:center; }
+  .mark{ height:20px; margin:0 auto 34px; display:block; opacity:.95; }
+  .avatar{
+    width:104px; height:104px; border-radius:50%; object-fit:cover;
+    filter:grayscale(1); display:block; margin:0 auto 22px;
+  }
+  .avatar-mono{
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); filter:none;
+    font-family:"Bebas Neue","Helvetica Neue",sans-serif; font-size:40px; letter-spacing:.04em; color:var(--fg);
+  }
+  .name{
+    font-family:"Bebas Neue","Helvetica Neue",sans-serif;
+    font-size:46px; line-height:.95; letter-spacing:.01em; margin:0;
+  }
+  .role{ margin:12px 0 4px; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--fg); }
+  .affil{ margin:0 0 30px; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); }
+  .actions{ display:flex; flex-direction:column; gap:11px; }
+  .btn{
+    display:flex; align-items:center; justify-content:center;
+    padding:15px 18px; border:1px solid var(--line); color:var(--fg); text-decoration:none;
+    font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+    transition:background .2s ease,color .2s ease,border-color .2s ease;
+  }
+  .btn:hover,.btn:active{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .btn.primary{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+  .btn.primary:hover,.btn.primary:active{ background:transparent; color:var(--fg); border-color:var(--line); }
+  .qr-wrap{ margin:34px auto 0; }
+  .qr{ width:128px; height:128px; margin:0 auto; background:#fff; padding:9px; border-radius:4px; display:flex; align-items:center; justify-content:center; }
+  .qr img,.qr canvas{ width:100%!important; height:100%!important; image-rendering:pixelated; display:block; }
+  .qr-cap{ margin:12px 0 0; font-size:8px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); }
+</style>
+</head>
+<body>
+  <main class="card">
+    <img class="mark" src="/machina2/img/machina-logo-solid.png" alt="MACHINA" />
+    <img class="avatar" id="avatar" alt="" />
+    <h1 class="name" id="name"></h1>
+    <p class="role" id="role"></p>
+    <p class="affil" id="affil"></p>
+    <nav class="actions" id="actions"></nav>
+    <div class="qr-wrap">
+      <div class="qr" id="qr" aria-label="QR code linking to this card"></div>
+      <p class="qr-cap">Scan to open this card</p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <script>
+  (function(){
+    var CARDS = {
+      mauricio: {
+        name:"Mauricio Sierra", role:"Founder / Artist / Director",
+        affil:"MACHINA — Paris-born hybrid AI collective",
+        photo:"/machina2/img/portrait-mauricio.png", objpos:"50% 30%", vcf:"/mauricio.vcf",
+        links:[
+          {label:"mauricio@mausierra.com", href:"mailto:mauricio@mausierra.com"},
+          {label:"+33 7 82 23 30 26", href:"tel:+33782233026"},
+          {label:"machinacollective.com", href:"https://machinacollective.com"}
+        ]
+      },
+      sabine: {
+        name:"Sabine Mañas", role:"Executive Producer",
+        affil:"Ghibli Media — MACHINA collective",
+        photo:"/machina2/img/portrait-ghibli.jpg", objpos:"82% 32%", vcf:"/sabine.vcf",
+        links:[
+          {label:"sabine@ghiblimedia.com", href:"mailto:sabine@ghiblimedia.com"},
+          {label:"+1 (917) 292-4009", href:"tel:+19172924009"},
+          {label:"machinacollective.com", href:"https://machinacollective.com"}
+        ]
+      },
+      diane: {
+        name:"Diane Kozlowski", role:"Producer",
+        affil:"Ghibli Media — MACHINA collective",
+        photo:null, vcf:"/diane.vcf",
+        links:[
+          {label:"diane@ghiblimedia.com", href:"mailto:diane@ghiblimedia.com"},
+          {label:"+1 (646) 924-9969", href:"tel:+16469249969"},
+          {label:"machinacollective.com", href:"https://machinacollective.com"}
+        ]
+      },
+      olga: {
+        name:"Olga Baranova", role:"Artist / Creative Technologist",
+        affil:"MACHINA — Paris-born hybrid AI collective",
+        photo:"/machina2/img/portrait-olga.jpg", objpos:"50% 32%", vcf:"/olga.vcf",
+        links:[
+          {label:"hello@olgabrnv.com", href:"mailto:hello@olgabrnv.com"},
+          {label:"+33 6 38 60 41 69", href:"tel:+33638604169"},
+          {label:"machinacollective.com", href:"https://machinacollective.com"}
+        ]
+      }
+    };
+
+    var slug = (location.pathname.split("/card/")[1] || "").replace(/\/+$/,"").toLowerCase();
+    var data = CARDS[slug] || CARDS.mauricio;
+    if (!CARDS[slug]) slug = "mauricio";
+
+    document.title = data.name + " — MACHINA";
+    var av = document.getElementById("avatar");
+    if (data.photo){
+      av.src = data.photo; av.alt = data.name;
+      if (data.objpos) av.style.objectPosition = data.objpos;
+    } else {
+      var mono = document.createElement("div");
+      mono.className = "avatar avatar-mono";
+      mono.textContent = data.name.split(/\s+/).map(function(w){return w.charAt(0);}).join("").slice(0,2).toUpperCase();
+      av.parentNode.replaceChild(mono, av);
+    }
+    document.getElementById("name").textContent = data.name.toUpperCase();
+    document.getElementById("role").textContent = data.role;
+    document.getElementById("affil").textContent = data.affil;
+
+    var actions = document.getElementById("actions");
+    var save = document.createElement("a");
+    save.className = "btn primary"; save.href = data.vcf;
+    save.setAttribute("download", data.name + ".vcf");
+    save.textContent = "Save contact";
+    actions.appendChild(save);
+    data.links.forEach(function(l){
+      var a = document.createElement("a");
+      a.className = "btn"; a.href = l.href; a.textContent = l.label;
+      if (l.href.indexOf("http") === 0){ a.target = "_blank"; a.rel = "noreferrer"; }
+      actions.appendChild(a);
+    });
+
+    try{
+      var url = "https://machinacollective.com/card/" + slug;
+      var qr = qrcode(0, "M"); qr.addData(url); qr.make();
+      document.getElementById("qr").innerHTML = qr.createImgTag(4, 0);
+    }catch(e){}
+  })();
+  </script>
+</body>
+</html>

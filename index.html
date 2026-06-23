@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Machina Collective</title>
+<meta name="description" content="MACHINA — a Paris-born hybrid AI creative collective working on the intersection of traditional craft and AI." />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=59" />
+<link rel="apple-touch-icon" href="/favicon.svg?v=59" />
+<!-- social share preview (Open Graph + Twitter card) -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://machinacollective.com/" />
+<meta property="og:site_name" content="Machina Collective" />
+<meta property="og:title" content="MACHINA" />
+<meta property="og:description" content="A Paris-born hybrid AI creative collective working at the intersection of traditional craft and AI." />
+<meta property="og:image" content="https://machinacollective.com/machina2/img/og-preview.jpg?v=59" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="MACHINA" />
+<meta name="twitter:description" content="A Paris-born hybrid AI creative collective working at the intersection of traditional craft and AI." />
+<meta name="twitter:image" content="https://machinacollective.com/machina2/img/og-preview.jpg?v=59" />
+<link rel="stylesheet" href="/machina3/styles.css?v=59" />
+<script src="/machina/image-slot.js"></script>
+<script src="/machina2/data.js?v=59"></script>
+</head>
+<body>
+<!-- displacement filter used by the home glass logo (backdrop-filter: url(#glassDisp)) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<filter id="glassDisp" x="-20%" y="-20%" width="140%" height="140%">
+<feTurbulence type="fractalNoise" baseFrequency="0.010 0.016" numOctaves="2" seed="11" result="noise"></feTurbulence>
+<feDisplacementMap in="SourceGraphic" in2="noise" scale="26" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+</filter>
+</svg>
+<div id="root"></div>
+<!-- HLS playback for Bunny Stream adaptive video (Safari plays HLS natively) -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script src="/machina3/app.js?v=59"></script>
+</body>
+</html>
