@@ -823,7 +823,6 @@
 
     var links = el("div", { class: "menu-links" },
       el("a", { href: "/collective", "data-page": "collective" }, "Collective"),
-      el("a", { href: "/lab", "data-page": "lab" }, "Lab"),
       el("a", { href: "/about", "data-page": "about" }, "About"),
       el("a", { href: "https://www.instagram.com/machina_collective", target: "_blank", rel: "noreferrer" }, "Instagram")
     );
