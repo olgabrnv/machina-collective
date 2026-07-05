@@ -13,6 +13,7 @@
   /* baked-in final design choices (were live "Tweaks" in the prototype) */
   var CONFIG = {
     logoFx: "Negative",   // home wordmark: "Negative" lens | "Glass"
+    homeSplash: true,     // home hero = branded splash film (logo/tagline baked in) → hides live logo + tagline
     markPos: "Left",      // corner wordmark: "Left" | "Center"
     listStyle: "Caps",    // collective names: "Caps" | "Editorial"
     grain: true,          // film-grain overlay
@@ -33,6 +34,17 @@
   var FILM = function () { return CONFIG.videoUrl || CDN + "machina-loop.mp4"; };
   var HERO = "/machina2/img/hero-frame.png";
   var LOGO = "/machina2/img/machina-logo-solid.png";
+  // branded home splash (chrome-fluid loop, MACHINA wordmark + tagline baked in).
+  // Desktop is 16:9, mobile is 9:16 — chosen by viewport. Replaces the old
+  // film + live negative-lens logo when CONFIG.homeSplash is on.
+  var SPLASH_DESKTOP = hls("69b05338-1c9c-494e-aa9e-7a9c06ec18e3");
+  var SPLASH_MOBILE  = hls("1e069948-37a7-4ec8-8b18-709e9b3bfcc8");
+  function mkSplashVideo(url) {
+    var v = el("video", { autoplay: "", muted: "", loop: "", playsinline: "", preload: "auto" });
+    v.muted = true; v.defaultMuted = true;
+    setMediaSrc(v, url);
+    return v;
+  }
 
   /* Attach a media URL to a <video>. HLS (.m3u8) plays natively in Safari, and
      via hls.js everywhere else. Plain files set src directly. Returns a teardown
@@ -327,6 +339,17 @@
   }
 
   function HomePage() {
+    // Splash mode: one full-screen branded film (logo + tagline baked in), no
+    // live wordmark / negative-lens overlay.
+    if (CONFIG.homeSplash) {
+      var spage = el("div", { class: "page", "data-screen-label": "Home — Splash" });
+      var svideo = mkSplashVideo(SPLASH_DESKTOP);
+      spage.appendChild(el("div", { class: "home-video" }, svideo));
+      var svideos = [svideo];
+      var sstop = autoplayMuted(svideos);
+      return { node: spage, destroy: function () { sstop(); svideos.forEach(teardownMedia); } };
+    }
+
     var page = el("div", { class: "page", "data-screen-label": "Home — Film" });
     var video = mkFilmVideo();
     page.appendChild(el("div", { class: "home-video" }, video));
@@ -755,14 +778,22 @@
   function MobileFlow(t) {
     var root = el("div", { class: "mobile-flow" });
 
-    // home section — film + negative-lens logo (scoped to the section, not fixed)
+    // home section — branded splash film (logo + tagline baked in) or, legacy,
+    // film + live negative-lens logo.
     var homeSec = el("section", { class: "mflow-section mflow-home", id: "mf-home" });
-    var bg = mkFilmVideo();
-    homeSec.appendChild(el("div", { class: "home-video" }, bg));
-    homeSec.appendChild(el("div", { class: "logo-center" }, GlassLogo()));
-    var videos = [bg];
-    if (CONFIG.logoFx === "Negative") { var lens = mkFilmVideo(); homeSec.appendChild(el("div", { class: "logo-neg-lens" }, lens)); videos.push(lens); }
-    homeSec.appendChild(el("div", { class: "mflow-tagline", text: "Paris-born hybrid AI collective" }));
+    var videos;
+    if (CONFIG.homeSplash) {
+      var sbg = mkSplashVideo(SPLASH_MOBILE);
+      homeSec.appendChild(el("div", { class: "home-video" }, sbg));
+      videos = [sbg];
+    } else {
+      var bg = mkFilmVideo();
+      homeSec.appendChild(el("div", { class: "home-video" }, bg));
+      homeSec.appendChild(el("div", { class: "logo-center" }, GlassLogo()));
+      videos = [bg];
+      if (CONFIG.logoFx === "Negative") { var lens = mkFilmVideo(); homeSec.appendChild(el("div", { class: "logo-neg-lens" }, lens)); videos.push(lens); }
+      homeSec.appendChild(el("div", { class: "mflow-tagline", text: "Paris-born hybrid AI collective" }));
+    }
     root.appendChild(homeSec);
 
     // collective section — scroll-driven rolling names: as the page scrolls
@@ -852,7 +883,7 @@
         menu.classList.toggle("on-media", page === "home" || page === "member");
         // focused image viewer: hide the nav so the side arrows are unobstructed
         menu.style.display = page === "labseries" ? "none" : "";
-        tagline.style.display = page === "home" ? "block" : "none";
+        tagline.style.display = (page === "home" && !CONFIG.homeSplash) ? "block" : "none";
         setActive(page);
       },
       // mobile continuous-flow: the fixed tagline is replaced by an in-section
@@ -984,7 +1015,7 @@
       root.appendChild(view.node);
       current = view;
       chrome.update(route.page);
-      if (route.page === "home") unpinTag = pinTagline(chrome.tagline);
+      if (route.page === "home" && !CONFIG.homeSplash) unpinTag = pinTagline(chrome.tagline);
       if (document.body.classList.contains("vplayer-open")) document.body.classList.remove("vplayer-open");
     }
 
