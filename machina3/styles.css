@@ -536,6 +536,35 @@ video::-webkit-media-controls-play-button { display: none !important; -webkit-ap
 }
 .about-contact:hover { opacity: 0.6; }
 
+/* ── about: email signup (Netlify Forms) ─────────── */
+.about-signup { margin-top: 2.6vh; }
+.signup-col { min-width: 0; }
+.signup-note {
+  margin: 0 0 9px;
+  opacity: 0.62;
+  line-height: 1.45;
+  max-width: 42ch;
+}
+.signup-form { display: flex; align-items: center; gap: 12px; max-width: 340px; }
+.signup-input {
+  flex: 1 1 auto; min-width: 0;
+  background: transparent; color: inherit;
+  border: none; border-bottom: 1px solid currentColor; border-radius: 0;
+  padding: 4px 0; font: inherit; letter-spacing: 0.02em;
+}
+.signup-input::placeholder { color: currentColor; opacity: 0.4; }
+.signup-input:focus { outline: none; }
+.signup-btn {
+  flex: 0 0 auto;
+  background: transparent; color: inherit; border: none; cursor: pointer;
+  font: inherit; font-size: 16px; line-height: 1; padding: 2px 2px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.signup-btn:hover { opacity: 0.6; transform: translateX(3px); }
+.signup-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.signup-form.is-sending { opacity: 0.45; pointer-events: none; }
+.signup-done, .signup-err { margin-bottom: 0; opacity: 0.85; }
+
 /* ── grain ─────────────────────────────────────── */
 .grain {
   position: fixed;
@@ -701,6 +730,10 @@ body.vplayer-open .deck-cue { display: none !important; }
   .about-row { grid-template-columns: 1fr; row-gap: 3px; margin-bottom: 1.7vh; font-size: 10px; }
   .about-row .label { color: var(--fg-dim); }
   .about-row li { line-height: 1.5; }
+  .about-signup { margin-top: 2.4vh; }
+  .signup-note { margin-left: auto; }
+  .signup-form { max-width: none; justify-content: flex-end; margin-top: 6px; }
+  .signup-input { flex: 0 1 220px; text-align: right; }
   /* mobile: menu becomes a horizontal row across the top-right,
      on the same line as the corner wordmark */
   .menu-bl { top: 4.6vh; left: auto; right: 2.6vw; transform: none; }

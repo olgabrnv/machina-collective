@@ -684,7 +684,54 @@
         el("ul", {}, [el("li", {}, el("a", { class: "about-contact", href: "mailto:" + a.contact, text: a.contact }))])
       ));
     }
+    wrap.appendChild(buildSignup());
     return wrap;
+  }
+
+  /* Email capture → Netlify Forms (form "updates", detected via the hidden
+     static form in index.html). Submits over AJAX so the page never reloads. */
+  function buildSignup() {
+    var col = el("div", { class: "signup-col" });
+    col.appendChild(el("p", { class: "signup-note", text: "Occasional notes on new work — no noise." }));
+
+    var input = el("input", {
+      class: "signup-input", type: "email", name: "email",
+      placeholder: "you@email.com", required: "", autocomplete: "email", "aria-label": "Email address"
+    });
+    var hp = el("input", { class: "signup-hp", type: "text", name: "bot-field", tabindex: "-1", autocomplete: "off", "aria-hidden": "true" });
+    var btn = el("button", { class: "signup-btn", type: "submit", "aria-label": "Sign up for updates", text: "→" });
+    var form = el("form", {
+      class: "signup-form", name: "updates", method: "POST",
+      onsubmit: function (e) { e.preventDefault(); sendSignup(form, input, hp, col); }
+    }, input, btn, hp);
+    col.appendChild(form);
+
+    return el("div", { class: "about-row about-signup" },
+      el("span", { class: "label", text: "UPDATES" }), col);
+  }
+
+  function sendSignup(form, input, hp, col) {
+    var email = (input.value || "").trim();
+    if (!email) { input.focus(); return; }
+    form.classList.add("is-sending");
+    var body = new URLSearchParams();
+    body.append("form-name", "updates");
+    body.append("email", email);
+    body.append("bot-field", hp.value || "");
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString()
+    }).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      col.innerHTML = "";
+      col.appendChild(el("p", { class: "signup-note signup-done", text: "Thank you — you’re on the list." }));
+    }).catch(function () {
+      form.classList.remove("is-sending");
+      if (!col.querySelector(".signup-err")) {
+        col.appendChild(el("p", { class: "signup-note signup-err", text: "Something went wrong — please try again." }));
+      }
+    });
   }
   function AboutPage() {
     return { node: el("div", { class: "page", "data-screen-label": "About" }, buildAboutWrap()), destroy: function () {} };
