@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MACHINA — Scroll Prototype</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#000; --fg:#fff; --fg-dim:#6E6E6E; --fg-faint:#3A3A3A;
+    --accent:#EFC964; --rule:rgba(255,255,255,0.16);
+    --ease:cubic-bezier(0.16,1,0.3,1);
+    --pad:clamp(20px,4vw,64px);
+  }
+  @font-face{
+    font-family:"Bebas Neue"; font-style:normal; font-weight:400; font-display:swap;
+    src:url("/machina3/fonts/BebasNeue-Regular.ttf") format("truetype");
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+
+  /* ---------- Sequenced, parallaxing background films ---------- */
+  #bg{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:#000}
+  #bg video{
+    position:absolute; top:50%; left:50%;
+    width:100%; height:160%; min-width:100%;
+    transform:translate3d(-50%,-50%,0); object-fit:cover;
+    opacity:0; transition:opacity 1.1s var(--ease); will-change:transform,opacity;
+  }
+  #bg video.active{opacity:1}
+  #bg .tint{
+    position:absolute; inset:0; z-index:2;
+    background:
+      radial-gradient(120% 90% at 50% 30%, transparent 42%, rgba(0,0,0,.5) 100%),
+      linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 78%, rgba(0,0,0,.5) 100%);
+  }
+  #grain{
+    position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.06;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+
+  /* ---------- Fixed chrome (corner wordmark + progress) ---------- */
+  .chrome{position:fixed; z-index:5; mix-blend-mode:difference; pointer-events:none}
+  #mark{
+    top:var(--pad); left:var(--pad); width:clamp(96px,9vw,150px);
+    opacity:0; transition:opacity .8s var(--ease);
+  }
+  #mark.show{opacity:1}
+  #mark img{width:100%; display:block}
+  #progress{position:fixed; top:0; left:0; height:2px; width:0; z-index:6;
+    background:var(--accent); opacity:.9; will-change:width}
+
+  /* ---------- Sections ---------- */
+  main{position:relative; z-index:2}
+  .sec{
+    position:relative; min-height:100svh; width:100%;
+    padding:calc(var(--pad) + 3vh) var(--pad);
+    display:flex; flex-direction:column;
+  }
+  .sec.center{align-items:center; justify-content:center; text-align:center}
+  .sec.right{align-items:flex-end; justify-content:center; text-align:left}
+  .sec.left{align-items:flex-start; justify-content:center}
+  .wrap{max-width:min(1500px,100%); width:100%}
+
+  /* Type */
+  .eyebrow{
+    font-size:clamp(10px,1vw,12px); letter-spacing:.28em; text-transform:uppercase;
+    color:var(--fg); mix-blend-mode:difference; margin-bottom:1.4em;
+  }
+  .statement{
+    font-weight:700; text-transform:uppercase; line-height:1.02;
+    letter-spacing:-.01em; font-size:clamp(30px,4.6vw,74px);
+    mix-blend-mode:difference; max-width:22ch;
+  }
+  .statement .dim{color:var(--fg-dim)}
+  .sub{
+    margin-top:2.2em; max-width:44ch; line-height:1.4; text-transform:uppercase; letter-spacing:.02em;
+    font-size:clamp(14px,1.35vw,19px); color:var(--fg); mix-blend-mode:difference;
+  }
+  /* Align type to the side it lives on */
+  .sec.right .statement, .sec.right .sub, .sec.right .eyebrow{text-align:right; margin-left:auto}
+  .sec.right .statement{max-width:20ch}
+  .sec.left  .statement, .sec.left  .sub, .sec.left  .eyebrow{text-align:left}
+
+  /* Hero */
+  #hero .logo{width:min(58vw,760px)}
+  #hero .logo img{width:100%; display:block}
+  #hero .tag{margin-top:1.6em; font-size:clamp(11px,1.1vw,14px);
+    letter-spacing:.24em; text-transform:uppercase; mix-blend-mode:difference}
+  #hero .kicker{margin-bottom:1.6em; font-size:clamp(10px,.9vw,12px);
+    letter-spacing:.24em; text-transform:uppercase; color:var(--fg); mix-blend-mode:difference}
+  .cornermeta{position:absolute; z-index:3; font-size:11px; letter-spacing:.14em;
+    line-height:1.5; text-transform:uppercase; mix-blend-mode:difference; opacity:.85; text-align:left}
+  .cornermeta.tl{top:var(--pad); left:var(--pad)}
+  .cornermeta.tr{top:var(--pad); right:var(--pad); text-align:right}
+  .cornermeta.bl{bottom:var(--pad); left:var(--pad)}
+  .cornermeta.br{bottom:var(--pad); right:var(--pad); text-align:right}
+  .scrollcue{position:absolute; bottom:calc(var(--pad) + 1vh); left:50%; transform:translateX(-50%);
+    font-size:10px; letter-spacing:.3em; text-transform:uppercase; mix-blend-mode:difference;
+    animation:bob 2.4s var(--ease) infinite}
+  @keyframes bob{0%,100%{transform:translate(-50%,0);opacity:.5}50%{transform:translate(-50%,6px);opacity:1}}
+
+  /* Capabilities grid */
+  .caps{display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,4vw,64px);
+    width:100%; max-width:1200px; margin-left:auto}
+  .cap{border-top:1px solid var(--rule); padding-top:1em}
+  .cap h3{font-weight:500; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(16px,1.5vw,22px); margin:0 0 .8em}
+  .cap ul{list-style:none; color:var(--fg-dim); text-transform:uppercase; letter-spacing:.02em; line-height:1.7; font-size:clamp(13px,1.1vw,16px)}
+
+  /* Clients */
+  .clients{display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(40px,6vw,90px);
+    width:100%; max-width:1100px; place-items:center; text-align:center;
+    margin-top:clamp(56px,11vh,150px)}
+  .clients span{font-size:clamp(20px,2.4vw,38px); letter-spacing:.02em; text-transform:uppercase; mix-blend-mode:difference}
+
+  /* The Unit */
+  .unit{display:flex; gap:clamp(16px,2vw,28px); flex-wrap:wrap}
+  .unit figure{width:clamp(120px,13vw,190px)}
+  .unit img{width:100%; aspect-ratio:1/1; object-fit:cover; filter:grayscale(1) contrast(1.05); display:block}
+  .unit figcaption{margin-top:.7em; font-size:12px; letter-spacing:.06em; text-transform:uppercase}
+  .unit figcaption small{display:block; color:var(--fg-dim); text-transform:uppercase; letter-spacing:.04em; margin-top:.3em}
+
+  /* End */
+  #end .big{font-family:"Bebas Neue",sans-serif; font-size:clamp(70px,16vw,240px);
+    line-height:.9; letter-spacing:.01em; mix-blend-mode:difference}
+  #end .loop{margin-top:2em; font-size:11px; letter-spacing:.3em; text-transform:uppercase;
+    mix-blend-mode:difference; cursor:pointer; pointer-events:auto; background:none; border:0; color:inherit; font-family:inherit}
+
+  /* ---------- Reveal ---------- */
+  .reveal{opacity:0; transform:translateY(24px); filter:blur(6px);
+    transition:opacity 1s var(--ease), transform 1.1s var(--ease), filter 1.1s var(--ease);
+    transition-delay:calc(var(--i,0)*90ms)}
+  .reveal.in{opacity:1; transform:none; filter:none}
+
+  @media (max-width:760px){
+    .caps{grid-template-columns:1fr}
+    .clients{grid-template-columns:1fr 1fr; gap:44px}
+    .sec.right{align-items:flex-start; text-align:left}
+    .statement{max-width:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .reveal{transition-duration:.4s; filter:none; transform:none}
+    #bg video{will-change:auto}
+    .scrollcue{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- Background film stack: one <video> per unique film, cross-faded on scroll -->
+<div id="bg">
+  <video data-film="splash" src="/scroll-assets/splash-page.mp4" muted loop playsinline preload="auto"></video>
+  <video data-film="ysl"    src="/scroll-assets/ysl-libre.mp4"   muted loop playsinline preload="auto"></video>
+  <div class="tint"></div>
+</div>
+<div id="grain"></div>
+<div id="progress"></div>
+<div class="chrome" id="mark"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
+
+<main>
+
+  <!-- 01 HERO -->
+  <section class="sec center" id="hero" data-film="splash">
+    <div class="cornermeta tl reveal">A Director-led studio<br>for luxury and beauty</div>
+    <div class="cornermeta tr reveal">©2026</div>
+    <div class="kicker reveal">A Ghibli Media Division</div>
+    <div class="logo reveal" style="--i:1"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
+    <div class="tag reveal" style="--i:2">Paris-born hybrid AI collective</div>
+    <div class="cornermeta bl reveal" style="--i:3">Classical craft at the core<br>Human touch preserved<br>Technology elevated</div>
+    <div class="cornermeta br reveal" style="--i:3">Paris — New York</div>
+    <div class="scrollcue">Scroll</div>
+  </section>
+
+  <!-- 02 WHO WE ARE -->
+  <section class="sec right" data-film="splash">
+    <div class="wrap" style="max-width:960px">
+      <div class="eyebrow reveal">[ → ] Who we are</div>
+      <h2 class="statement reveal" style="--i:1">Machina operates at the intersection of art, technology, and intelligence. We are a collective of artists. Brands bring us in at the idea, and we author it through to the final frame, at the level luxury demands.</h2>
+      <p class="sub reveal" style="--i:3">We build systems around the idea. AI is a new instrument in the hands of artists, serving the work and elevating craft through precision, consistency, and control.</p>
+    </div>
+  </section>
+
+  <!-- 03 CAPABILITIES -->
+  <section class="sec right" data-film="splash">
+    <div class="wrap">
+      <div class="eyebrow reveal">[ → ] Our capabilities</div>
+      <div class="caps">
+        <div class="cap reveal"><h3>Creative Direction</h3><ul><li>Concept Development</li><li>Narrative &amp; World Building</li><li>Campaign Systems</li><li>AI Art Direction</li></ul></div>
+        <div class="cap reveal" style="--i:1"><h3>Systems &amp; Pipeline</h3><ul><li>AI Workflow Design</li><li>Custom Model Training</li><li>Production Pipelines</li><li>Automation &amp; Scaling</li><li>Tool Integration</li></ul></div>
+        <div class="cap reveal" style="--i:1"><h3>Hybrid Production</h3><ul><li>360 Executive Hybrid production</li><li>AI Video &amp; Motion</li><li>World building</li><li>Digital Environments</li></ul></div>
+        <div class="cap reveal" style="--i:2"><h3>Training &amp; Education</h3><ul><li>Corporate Training</li><li>Creative Workshops</li><li>AI for Creative Team</li><li>Workflow Implementation</li></ul></div>
+        <div class="cap reveal" style="--i:1"><h3>Content &amp; Visuals</h3><ul><li>Hybrid and AI-only Campaign</li><li>Still &amp; Motion Generation</li><li>Product Visualization</li><li>Model &amp; Talent Systems</li><li>Post: Editing, Color, Retouch</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 WHAT WE DO  (YSL Libre bottle takes over) -->
+  <section class="sec left" data-film="ysl">
+    <div class="wrap" style="max-width:1100px">
+      <div class="eyebrow reveal">[ → ] What we do</div>
+      <h2 class="statement reveal" style="--i:1; max-width:30ch">Machina forms around an idea and holds it from concept to final frame. We work in luxury image and motion, alongside brands and agencies, never in their place.</h2>
+    </div>
+  </section>
+
+  <!-- 05 SCALE -->
+  <section class="sec right" data-film="ysl">
+    <div class="wrap" style="max-width:900px">
+      <h2 class="statement reveal">We have developed a new way of working. So the work scales creatively and volumetrically without losing its signature.</h2>
+    </div>
+  </section>
+
+  <!-- 06 WHY -->
+  <section class="sec left" data-film="ysl">
+    <div class="wrap" style="max-width:1100px">
+      <div class="eyebrow reveal">[ → ] Why we do it</div>
+      <h2 class="statement reveal" style="--i:1">Craft is the only difference left when anyone can generate anything.</h2>
+      <p class="sub reveal" style="--i:2">Taste becomes the center. We are curators. A hybrid approach — classical craft at the core, human touch preserved, technology elevated.</p>
+    </div>
+  </section>
+
+  <!-- 07 SYSTEMS -->
+  <section class="sec left" data-film="ysl">
+    <div class="wrap" style="max-width:900px">
+      <h2 class="statement reveal">We believe in systems over shortcuts. AI is a new render engine in service of human creativity — a higher level of precision, consistency and control.</h2>
+    </div>
+  </section>
+
+  <!-- 08 CLIENTS  (back to the chrome splash world) -->
+  <section class="sec center" data-film="splash">
+    <div class="wrap">
+      <div class="eyebrow reveal" style="text-align:center">[ → ] Selected clients</div>
+      <div class="clients">
+        <span class="reveal">L'ORÉAL</span>
+        <span class="reveal" style="--i:1">Google</span>
+        <span class="reveal" style="--i:2">Yves Saint Laurent</span>
+        <span class="reveal" style="--i:1">Estée Lauder</span>
+        <span class="reveal" style="--i:2">Kilian</span>
+        <span class="reveal" style="--i:3">VOGUE</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 THE UNIT -->
+  <section class="sec left" data-film="splash">
+    <div class="wrap">
+      <div class="eyebrow reveal">[ → ] The unit</div>
+      <div class="unit">
+        <figure class="reveal"><img src="/machina2/img/portrait-mauricio.png" alt=""><figcaption>Mauricio Sierra<small>Founder + Chief Creative Officer</small></figcaption></figure>
+        <figure class="reveal" style="--i:1"><img src="/machina2/img/portrait-olga.jpg" alt=""><figcaption>Olga Baranova<small>Co-Founder + Creative Technologist</small></figcaption></figure>
+        <figure class="reveal" style="--i:2"><img src="/machina2/img/portrait-ghibli.jpg" alt=""><figcaption>Sabine Mañas<small>Co-Founder + Executive Producer</small></figcaption></figure>
+      </div>
+      <p class="sub reveal" style="--i:2; max-width:52ch">Machina is a director-led collective. Every project is authored and directed by Mauricio Sierra — one eye holding the vision from concept to final frame. Craft is the foundation. Technology, the amplifier.</p>
+    </div>
+  </section>
+
+  <!-- 10 THE WORK / END -->
+  <section class="sec center" id="end" data-film="splash">
+    <div class="wrap">
+      <div class="big reveal">THE WORK</div>
+      <button class="loop reveal" style="--i:1" id="toTop">↑ Back to the top</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  // ---- Tunables -----------------------------------------------------------
+  var PARALLAX = 0.28;   // BG speed vs scroll (was 0.15). Higher = faster BG motion.
+  var CLAMP_VH = 26;     // max BG drift each way, in vh (keeps film edges hidden)
+  // -------------------------------------------------------------------------
+
+  var reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+  // ---- Reveal type as it scrolls into view (one-shot, elegant) ----
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, { threshold:0.18, rootMargin:"0px 0px -8% 0px" });
+  document.querySelectorAll(".reveal").forEach(function(n){ io.observe(n); });
+
+  var videos = {};       // film name -> <video>
+  document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; });
+
+  // Build "runs": contiguous sections that share the same film.
+  var secs = Array.prototype.slice.call(document.querySelectorAll("main .sec"));
+  var runs = [];
+  secs.forEach(function(s){
+    var film = s.dataset.film;
+    var last = runs[runs.length-1];
+    if (last && last.film === film) last.sections.push(s);
+    else runs.push({ film:film, sections:[s] });
+  });
+
+  function runBounds(run){
+    var top = run.sections[0].offsetTop;
+    var lastS = run.sections[run.sections.length-1];
+    var bottom = lastS.offsetTop + lastS.offsetHeight;
+    return { top:top, bottom:bottom };
+  }
+
+  var mark = document.getElementById("mark");
+  var bar  = document.getElementById("progress");
+  var vh   = window.innerHeight;
+  var activeFilm = null;
+
+  function setActiveFilm(film){
+    if (film === activeFilm) return;
+    activeFilm = film;
+    for (var k in videos){
+      var v = videos[k];
+      if (k === film){ v.classList.add("active"); v.play().catch(function(){}); }
+      else { v.classList.remove("active"); try{ v.pause(); }catch(e){} }
+    }
+  }
+
+  var ticking = false, sy = 0;
+  function onScroll(){ sy = window.pageYOffset; if(!ticking){ ticking = true; requestAnimationFrame(frame); } }
+  function frame(){
+    var center = sy + vh/2;
+    // Which run holds the viewport center?
+    var run = runs[0], b = runBounds(run);
+    for (var i=0;i<runs.length;i++){
+      var rb = runBounds(runs[i]);
+      if (center >= rb.top && center < rb.bottom){ run = runs[i]; b = rb; break; }
+      if (i === runs.length-1){ run = runs[i]; b = rb; }
+    }
+    setActiveFilm(run.film);
+
+    if (!reduce){
+      // Parallax the active film: drift grows as you scroll into the run, re-anchored
+      // at each run's top so a new film starts centered. Clamped so edges never show.
+      var drift = -(sy - b.top) * PARALLAX;
+      var max = CLAMP_VH/100*vh;
+      if (drift < -max) drift = -max;
+      if (drift > max) drift = max;
+      var v = videos[run.film];
+      if (v) v.style.transform = "translate3d(-50%,calc(-50% + " + drift + "px),0)";
+    }
+
+    var maxScroll = document.documentElement.scrollHeight - vh;
+    bar.style.width = (maxScroll>0 ? (sy/maxScroll*100) : 0) + "%";
+    mark.classList.toggle("show", sy > vh*0.6);
+    ticking = false;
+  }
+
+  window.addEventListener("scroll", onScroll, {passive:true});
+  window.addEventListener("resize", function(){ vh = window.innerHeight; frame(); }, {passive:true});
+  // Kick things off (autoplay the first film immediately).
+  setActiveFilm(runs[0].film);
+  frame();
+
+  document.getElementById("toTop").addEventListener("click", function(){
+    window.scrollTo({ top:0, behavior:"smooth" });
+  });
+})();
+</script>
+</body>
+</html>
