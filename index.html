@@ -139,8 +139,11 @@
     font-size:clamp(11px,1.1vw,14px); letter-spacing:.18em; text-transform:uppercase; mix-blend-mode:difference}
 
   /* ---------- Collective (gun-barrel roll) ---------- */
-  .collective{height:200vh; padding:0; display:block}
-  .roll-stage{position:sticky; top:0; height:100svh; overflow:hidden}
+  /* Section is exactly 2x the sticky stage, both in dvh so they track the live
+     viewport height the JS roll uses (window.innerHeight). Mixing vh + svh here
+     broke the ratio on mobile: the roll finished early and left dead space. */
+  .collective{height:200dvh; padding:0; display:block}
+  .roll-stage{position:sticky; top:0; height:100dvh; overflow:hidden}
   .roll-stage .eyebrow{position:absolute; top:calc(var(--pad) + 8vh); right:var(--pad); margin:0}
   .roll{position:absolute; inset:0}
   .roll-name{position:absolute; top:50%; right:var(--pad); transform-origin:right center;
@@ -510,11 +513,21 @@
   document.querySelectorAll(".reveal").forEach(function(n){ io.observe(n); });
 
   // ---- HLS helpers (shared by background films + artist decks) ----
-  function attachHls(video, url){
+  function attachHls(video, url, maxQuality){
     if (window.Hls && window.Hls.isSupported()){
-      var h = new window.Hls({ enableWorker:true, maxBufferLength:20 });
+      // Bias ABR toward higher renditions: never cap to the element's pixel size,
+      // and assume a healthy connection up front so it doesn't open on the lowest
+      // rung. maxQuality (used by the click-to-watch player) pins the top rendition.
+      var h = new window.Hls({ enableWorker:true, maxBufferLength:30,
+        capLevelToPlayerSize:false, abrEwmaDefaultEstimate:5000000, startLevel:-1 });
       h.loadSource(url); h.attachMedia(video); video._hls = h;
-    } else { video.src = url; }   // Safari plays HLS natively
+      if (maxQuality){
+        h.on(window.Hls.Events.MANIFEST_PARSED, function(){
+          var top = h.levels.length - 1;
+          h.startLevel = top; h.currentLevel = top;   // force the highest rendition
+        });
+      }
+    } else { video.src = url; }   // Safari plays HLS natively (iOS picks the level)
   }
   function detachHls(video){
     if (video._hls){ try{ video._hls.destroy(); }catch(e){} video._hls = null; }
@@ -704,11 +717,27 @@
   setActiveFilm(runs[0] ? runs[0].film : "none");
   frame();
 
-  // iOS may block muted autoplay until a gesture — kick the active film on first touch/click.
+  // iOS blocks programmatic play() for any <video> that was never started inside a
+  // user gesture — so only the film that autoplays on load ends up playable, and the
+  // rest stay black when setActiveFilm() tries to play them on scroll. On the first
+  // touch/click we "prime" (unlock) EVERY background film: attach the lazy HLS ones,
+  // call play(), then immediately pause the inactive ones. After this one gesture,
+  // later play() calls succeed for all of them.
+  var videosPrimed = false;
+  function primeAllFilms(){
+    if (videosPrimed) return; videosPrimed = true;
+    Object.keys(videos).forEach(function(k){
+      var v = videos[k];
+      if (v.dataset.hls && !v._hls && !v.src) attachHls(v, v.dataset.hls);
+      var pr = v.play();
+      if (pr && pr.then) pr.then(function(){ if (k !== activeFilm){ try{ v.pause(); }catch(e){} } })
+                           .catch(function(){});
+      else if (k !== activeFilm){ try{ v.pause(); }catch(e){} }
+    });
+    if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
+  }
   ["touchstart","click"].forEach(function(ev){
-    window.addEventListener(ev, function(){
-      if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
-    }, {once:true, passive:true});
+    window.addEventListener(ev, primeAllFilms, {once:true, passive:true});
   });
 
   // ---- Artist work deck (opened from the Collective) ----
@@ -819,7 +848,15 @@
         } else { try{ v.pause(); }catch(err){} }
       });
     }, { threshold:0.25 });
-    oWorks.querySelectorAll("video").forEach(function(v){ workIO.observe(v); });
+    // openArtist runs inside the tap that opened the deck, so this play()/pause()
+    // pass is still a user gesture — it unlocks each film for iOS so the observer
+    // above can actually play the in-view one (otherwise decks stay black on iPhone).
+    oWorks.querySelectorAll("video").forEach(function(v){
+      workIO.observe(v);
+      if (!v._hls && !v.src){ if (v.dataset.hls==="1") attachHls(v, v.dataset.src); else v.src = v.dataset.src; }
+      var pr = v.play();
+      if (pr && pr.then) pr.then(function(){ v.pause(); }).catch(function(){});
+    });
   }
 
   function closeArtist(){
@@ -849,7 +886,7 @@
     var mimg = document.createElement("img"); mimg.src = "/machina2/img/machina-logo-solid.png"; mimg.alt = "MACHINA"; mark.appendChild(mimg);
     var video = document.createElement("video"); video.setAttribute("playsinline",""); video.playsInline = true;
     if (contain) video.style.objectFit = "contain";
-    if (isHls) attachHls(video, url); else video.src = url;
+    if (isHls) attachHls(video, url, true); else video.src = url;   // player = highest rendition
     var playBtn = document.createElement("button"); playBtn.className = "vp-btn"; playBtn.innerHTML = ICON.pause;
     var volBtn = document.createElement("button"); volBtn.className = "vp-btn vp-vol"; volBtn.innerHTML = ICON.vol;
     var closeBtn = document.createElement("button"); closeBtn.className = "vp-btn vplayer-x"; closeBtn.setAttribute("aria-label","Close"); closeBtn.innerHTML = ICON.close;
