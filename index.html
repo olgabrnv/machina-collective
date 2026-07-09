@@ -259,22 +259,22 @@
   .crow{display:grid; grid-template-columns:1fr 1fr; gap:1.4em}
   .cfield label{display:block; font-size:clamp(11px,1vw,13px); letter-spacing:.06em; margin-bottom:.7em}
   .cfield label .req{color:var(--fg-dim)}
-  .cfield input, .cfield textarea{width:100%; background:#141416; border:1px solid var(--rule); color:var(--fg);
-    font-family:inherit; font-size:clamp(13px,1.1vw,15px); padding:.95em 1em; outline:none; transition:border-color .3s var(--ease)}
+  .cfield input, .cfield textarea{width:100%; background:#141416; border:0; color:var(--fg);
+    font-family:inherit; font-size:clamp(13px,1.1vw,15px); padding:.95em 1em; outline:none; transition:background-color .3s var(--ease)}
   .cfield input::placeholder, .cfield textarea::placeholder{color:#555}
-  .cfield input:focus, .cfield textarea:focus{border-color:rgba(255,255,255,.4)}
+  .cfield input:focus, .cfield textarea:focus{background:#1e1e21}
   .cfield textarea{min-height:150px; resize:vertical}
   .chips{display:flex; flex-wrap:wrap; gap:.7em}
   .chips input{position:absolute; opacity:0; width:0; height:0}
-  .chips label{cursor:pointer; background:#141416; border:1px solid var(--rule); color:var(--fg);
+  .chips label{cursor:pointer; background:#141416; border:0; color:var(--fg);
     font-size:clamp(11px,1vw,14px); letter-spacing:.02em; padding:.85em 1.2em; transition:all .25s var(--ease); margin:0}
-  .chips label:hover{border-color:rgba(255,255,255,.35)}
-  .chips input:checked + label{background:var(--fg); color:#000; border-color:var(--fg)}
+  .chips label:hover{background:#1e1e21}
+  .chips input:checked + label{background:var(--fg); color:#000}
   .cfile{margin-top:1.6em}
   .cfile-btn{display:inline-flex; align-items:center; gap:.8em; cursor:pointer; background:#141416;
-    border:1px solid var(--rule); color:var(--fg); font-size:clamp(11px,1vw,13px); letter-spacing:.1em;
-    text-transform:uppercase; padding:1em 1.4em; transition:border-color .3s var(--ease)}
-  .cfile-btn:hover{border-color:rgba(255,255,255,.4)}
+    border:0; color:var(--fg); font-size:clamp(11px,1vw,13px); letter-spacing:.1em;
+    text-transform:uppercase; padding:1em 1.4em; transition:background-color .3s var(--ease)}
+  .cfile-btn:hover{background:#1e1e21}
   .cfile-name{margin-left:1em; color:var(--fg-dim); font-size:clamp(11px,1vw,13px)}
   .csubmit{margin-top:clamp(30px,5vh,56px); width:100%; background:var(--fg); color:#000; border:0;
     cursor:pointer; font-family:inherit; font-size:clamp(12px,1.1vw,14px); letter-spacing:.24em;
