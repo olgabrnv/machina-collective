@@ -270,12 +270,6 @@
     font-size:clamp(11px,1vw,14px); letter-spacing:.02em; padding:.85em 1.2em; transition:all .25s var(--ease); margin:0}
   .chips label:hover{background:#1e1e21}
   .chips input:checked + label{background:var(--fg); color:#000}
-  .cfile{margin-top:1.6em}
-  .cfile-btn{display:inline-flex; align-items:center; gap:.8em; cursor:pointer; background:#141416;
-    border:0; color:var(--fg); font-size:clamp(11px,1vw,13px); letter-spacing:.1em;
-    text-transform:uppercase; padding:1em 1.4em; transition:background-color .3s var(--ease)}
-  .cfile-btn:hover{background:#1e1e21}
-  .cfile-name{margin-left:1em; color:var(--fg-dim); font-size:clamp(11px,1vw,13px)}
   .csubmit{margin-top:clamp(30px,5vh,56px); width:100%; background:var(--fg); color:#000; border:0;
     cursor:pointer; font-family:inherit; font-size:clamp(12px,1.1vw,14px); letter-spacing:.24em;
     text-transform:uppercase; padding:1.3em; transition:opacity .3s var(--ease)}
@@ -475,7 +469,7 @@
       <div class="contact-eyebrow">Contact</div>
       <a class="contact-email" href="mailto:sabine@ghiblimedia.com">sabine@ghiblimedia.com</a>
     </div>
-    <form class="cform" name="project-inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" enctype="multipart/form-data">
+    <form class="cform" name="project-inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field">
       <input type="hidden" name="form-name" value="project-inquiry">
       <p hidden><label>Leave blank: <input name="bot-field"></label></p>
       <h2>Let's Connect</h2>
@@ -528,10 +522,6 @@
             <input type="radio" id="t4" name="timeline" value="6+ months"><label for="t4">6+ months</label>
             <input type="radio" id="t5" name="timeline" value="Flexible"><label for="t5">Flexible</label>
           </div>
-        </div>
-        <div class="cfile">
-          <label class="cfile-btn" for="project-pdf">↑ Upload project PDF<input id="project-pdf" type="file" name="project-pdf" accept="application/pdf" hidden></label>
-          <span class="cfile-name"></span>
         </div>
       </div>
 
@@ -732,12 +722,7 @@
   });
   contact.querySelector(".contact-back").addEventListener("click", closeContact);
 
-  // filename display for the upload field
-  var fileInput = contact.querySelector("#project-pdf");
-  var fileName = contact.querySelector(".cfile-name");
-  fileInput.addEventListener("change", function(){ fileName.textContent = fileInput.files[0] ? fileInput.files[0].name : ""; });
-
-  // AJAX submit to Netlify Forms (keeps the overlay; sends fields + PDF to Sabine + Mauricio server-side)
+  // AJAX submit to Netlify Forms (keeps the overlay; emails all answers to Sabine + Mauricio server-side)
   var cform = contact.querySelector(".cform");
   var cnote = contact.querySelector(".cnote");
   var csubmit = contact.querySelector(".csubmit");
@@ -745,7 +730,8 @@
     e.preventDefault();
     cnote.className = "cnote"; cnote.textContent = "";
     csubmit.disabled = true; csubmit.textContent = "Sending…";
-    fetch("/", { method:"POST", body:new FormData(cform) })
+    fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+      body:new URLSearchParams(new FormData(cform)).toString() })
       .then(function(r){
         if (!r.ok) throw new Error("bad response");
         cform.reset(); if (fileName) fileName.textContent = "";
