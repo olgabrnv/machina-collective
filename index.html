@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>MACHINA</title>
 <meta name="description" content="MACHINA — a Paris-born hybrid AI creative collective working at the intersection of traditional craft and AI." />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=62" />
@@ -43,7 +43,7 @@
     background:var(--bg); color:var(--fg);
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
     -webkit-font-smoothing:antialiased; overflow-x:hidden; overscroll-behavior-x:none;
-    width:100%; max-width:100%; position:relative;
+    width:100%; max-width:100%; position:relative; touch-action:pan-y;
   }
 
   /* ---------- Sequenced, parallaxing background films ---------- */
@@ -541,6 +541,11 @@
   var reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
   var mqMobile = matchMedia("(max-width:760px)");   // must match the CSS breakpoint exactly
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  // Lock zoom (iOS ignores user-scalable=no, so block its pinch gestures).
+  // Double-tap zoom is handled by touch-action:pan-y in CSS.
+  ["gesturestart","gesturechange","gestureend"].forEach(function(ev){
+    document.addEventListener(ev, function(e){ e.preventDefault(); }, {passive:false});
+  });
   var main = document.querySelector("main");
 
   // ---- Duplicate all content once so the DOWNWARD loop has runway: when you
