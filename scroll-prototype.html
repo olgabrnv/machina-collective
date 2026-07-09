@@ -166,25 +166,46 @@
     opacity:0; visibility:hidden; transition:opacity .6s var(--ease), visibility .6s var(--ease)}
   .artist.open{opacity:1; visibility:visible}
   .artist-scroll{position:absolute; inset:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
-    padding:calc(var(--pad) + 12vh) var(--pad) calc(var(--pad) + 8vh)}
-  .artist-head{max-width:1200px; margin:0 auto clamp(28px,5vh,72px)}
-  .artist-name{font-family:"Bebas Neue",sans-serif; font-weight:400; text-transform:uppercase;
-    letter-spacing:-.01em; line-height:.9; font-size:clamp(44px,8vw,120px)}
-  .artist-role{margin-top:.4em; font-size:clamp(11px,1.1vw,14px); letter-spacing:.22em;
-    text-transform:uppercase; color:var(--fg-dim)}
+    padding:calc(var(--pad) + 11vh) var(--pad) calc(var(--pad) + 12vh)}
   .artist-works{max-width:1200px; margin:0 auto; display:flex; flex-direction:column; gap:clamp(40px,7vh,110px)}
   .work{width:100%}
-  .work-media{position:relative; width:100%; aspect-ratio:16/9; background:#0a0b0f; overflow:hidden}
+  .work-media{position:relative; width:100%; aspect-ratio:16/9; background:#0a0b0f; overflow:hidden; cursor:pointer}
   .work-media video, .work-media img{width:100%; height:100%; object-fit:cover; display:block}
+  .work-media.contain{background:#000}
+  .work-media.contain video, .work-media.contain img{object-fit:contain}
   .work-cap{margin-top:1em; display:flex; justify-content:space-between; gap:2em; flex-wrap:wrap}
-  .work-cap .p{font-family:"Bebas Neue",sans-serif; font-weight:400; text-transform:uppercase;
-    letter-spacing:.01em; font-size:clamp(20px,2.2vw,32px)}
-  .work-cap .t{font-size:clamp(10px,1vw,13px); letter-spacing:.22em; text-transform:uppercase; color:var(--fg-dim)}
+  /* Title + type both in the small label font: title white, type grey */
+  .work-cap .p{font-size:clamp(11px,1.1vw,14px); letter-spacing:.16em; text-transform:uppercase; color:var(--fg)}
+  .work-cap .t{font-size:clamp(11px,1.1vw,14px); letter-spacing:.16em; text-transform:uppercase; color:var(--fg-dim)}
+  /* Artist name — small label font, centred at the bottom */
+  .artist-name-c{position:absolute; left:0; right:0; bottom:var(--pad); z-index:2; text-align:center;
+    font-size:clamp(11px,1.1vw,14px); letter-spacing:.24em; text-transform:uppercase; mix-blend-mode:difference}
   .artist-back{position:fixed; left:var(--pad); bottom:var(--pad); z-index:7; pointer-events:auto;
     font-size:clamp(10px,1vw,12px); letter-spacing:.24em; text-transform:uppercase; mix-blend-mode:difference;
     background:none; border:0; color:var(--fg); font-family:inherit; cursor:pointer; opacity:.85}
   .artist-back:hover{opacity:1}
   body.locked{overflow:hidden}
+
+  /* ---------- Fullscreen video player (ported from the published site) ---------- */
+  .vplayer{position:fixed; inset:0; z-index:50; background:#000; display:flex; align-items:center;
+    justify-content:center; animation:vpIn .3s var(--ease)}
+  @keyframes vpIn{from{opacity:0}to{opacity:1}}
+  .vplayer video{width:100%; height:100%; object-fit:contain; cursor:pointer; background:#000}
+  .vplayer-mark{position:absolute; top:4.6vh; left:2.6vw; z-index:2; cursor:pointer; mix-blend-mode:difference}
+  .vplayer-mark img{width:clamp(96px,7.5vw,140px); height:auto; display:block}
+  .vplayer-bar{position:absolute; left:2.6vw; right:2.6vw; bottom:4vh; z-index:2; mix-blend-mode:difference}
+  .vp-controls{display:flex; align-items:center; justify-content:space-between; margin-bottom:15px}
+  .vp-right{display:flex; align-items:center; gap:28px}
+  .vp-btn{background:none; border:0; padding:0; margin:0; cursor:pointer; color:#fff; line-height:0;
+    display:inline-flex; align-items:center; opacity:.92; transition:opacity .2s var(--ease)}
+  .vp-btn:hover{opacity:1}
+  .vp-vol.off{opacity:.3}
+  .vp-track{position:relative; padding:9px 0; cursor:pointer}
+  .vp-track::before{content:""; position:absolute; left:0; right:0; top:50%; height:1px;
+    background:rgba(255,255,255,.28); transform:translateY(-50%)}
+  .vp-fill{position:absolute; left:0; top:50%; height:1px; background:#fff; transform:translateY(-50%)}
+  .vp-head{position:absolute; top:50%; width:1px; height:12px; background:#fff; transform:translate(-50%,-50%)}
+  body.vplayer-open .artist-name-c, body.vplayer-open .artist-back{display:none}
 
   /* ---------- Reveal ---------- */
   .reveal{opacity:0; transform:translateY(24px); filter:blur(6px);
@@ -355,12 +376,9 @@
 <!-- Artist work deck (opened from the Collective). Nav bar stays above it (z-index). -->
 <section id="artist" class="artist" aria-hidden="true">
   <div class="artist-scroll">
-    <header class="artist-head">
-      <div class="artist-name"></div>
-      <div class="artist-role"></div>
-    </header>
     <div class="artist-works"></div>
   </div>
+  <div class="artist-name-c"></div>
   <button class="artist-back" type="button">[ ← ] Back</button>
 </section>
 
@@ -555,20 +573,23 @@
   // ---- Artist work deck (opened from the Collective) ----
   var STREAM = "https://vz-d7ddf2a7-c8e.b-cdn.net/";
   function m3u8(g){ return STREAM + g + "/playlist.m3u8"; }
+  var SUSPENDED = { src:"/scroll-assets/suspended.mp4", p:"Suspended", t:"Short Film" };  // shared Mauricio + Olga
   var ARTISTS = {
-    mauricio: { name:"Mauricio Sierra", role:"Founder / Artist / Director", works:[
+    mauricio: { name:"Mauricio Sierra", works:[
       {g:"df2f3bca-1321-4ffb-a1ab-b3527f69d5a1", p:"Nothing Special", t:"Short Film"},
+      SUSPENDED,
       {g:"0b28f942-c81c-448e-98d3-ef8494859606", p:"Layer Zero: The Descent", t:"Short Film"},
       {g:"1732e792-cf73-4721-bb42-ef0c1c80c2ba", p:"Kilian — Her Majesty", t:"Commercial"},
       {g:"12b7da7b-3957-448c-a8d8-0f617c8f3989", p:"Valentino Beauty", t:"Commercial"},
       {g:"b54a6565-a184-4207-85af-931d86c25ed6", p:"Love Me Not", t:"Commercial"}
     ]},
-    olga: { name:"Olga Baranova", role:"Artist / Creative Technologist", works:[
+    olga: { name:"Olga Baranova", works:[
       {g:"b4399721-d815-4119-a87a-e8bef1592cfc", p:"Fanal — Google Flow Sessions", t:"Short Film"},
+      SUSPENDED,
       {g:"3e4cae54-b00c-4217-9100-2d6367d05e23", p:"Luna View", t:"Short Film"},
       {g:"9e8295b9-5572-4e2e-b43b-a98b2ed8350b", p:"ElevenLabs Studio", t:"Brand Partnership"}
     ]},
-    ghibli: { name:"Ghibli Media", role:"Producers", works:[
+    ghibli: { name:"Ghibli Media", works:[
       {g:"fd800681-6742-4613-ac48-2e8075837d54", p:"Tommy Hilfiger — Impact", t:"Commercial"},
       {g:"04bd3578-d6a9-4a27-a882-2e66d4cf96e4", p:"Zegna — Break the Mold", t:"Commercial"},
       {img:"/machina2/img/chanel-1.jpg", p:"Chanel N°5", t:"Campaign"},
@@ -577,27 +598,29 @@
     ]}
   };
   var overlay = document.getElementById("artist");
-  var oName = overlay.querySelector(".artist-name");
-  var oRole = overlay.querySelector(".artist-role");
+  var oNameC = overlay.querySelector(".artist-name-c");
   var oWorks = overlay.querySelector(".artist-works");
-  var workIO = null;
+  var workIO = null, clearTimer = null;
 
   function openArtist(id){
     var a = ARTISTS[id]; if (!a) return;
-    oName.textContent = a.name;
-    oRole.textContent = a.role;
+    if (clearTimer){ clearTimeout(clearTimer); clearTimer = null; }   // don't let a pending close wipe this
+    oNameC.textContent = a.name;
     oWorks.innerHTML = "";
     a.works.forEach(function(w){
       var work = document.createElement("div"); work.className = "work";
-      var media = document.createElement("div"); media.className = "work-media";
-      if (w.g){
+      var media = document.createElement("div"); media.className = "work-media" + (w.fit==="contain" ? " contain" : "");
+      if (w.g || w.src){
+        var url = w.g ? m3u8(w.g) : w.src;
         var v = document.createElement("video");
         v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute("playsinline","");
-        v.dataset.src = m3u8(w.g);
+        v.dataset.src = url; v.dataset.hls = w.g ? "1" : "";
         media.appendChild(v);
+        media.dataset.play = url; media.dataset.hls = w.g ? "1" : "";
+        media.addEventListener("click", function(){ openPlayer(media.dataset.play, media.dataset.hls==="1", w.fit==="contain"); });
       } else if (w.img){
         var img = document.createElement("img"); img.src = w.img; img.alt = w.p;
-        media.appendChild(img);
+        media.appendChild(img); media.style.cursor = "default";
       }
       var cap = document.createElement("div"); cap.className = "work-cap";
       var pe = document.createElement("span"); pe.className = "p"; pe.textContent = w.p;
@@ -612,12 +635,12 @@
     overlay.querySelector(".artist-scroll").scrollTop = 0;
     if (activeFilm && videos[activeFilm]) { try{ videos[activeFilm].pause(); }catch(e){} }
 
-    // Lazy-attach + play each film only while it's in view (keeps many HLS streams light)
+    // Lazy-attach + play each film only while it's in view (keeps many streams light)
     workIO = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
         var v = e.target;
         if (e.isIntersecting){
-          if (!v._hls && !v.src) attachHls(v, v.dataset.src);
+          if (!v._hls && !v.src){ if (v.dataset.hls==="1") attachHls(v, v.dataset.src); else v.src = v.dataset.src; }
           v.play().catch(function(){});
         } else { try{ v.pause(); }catch(err){} }
       });
@@ -626,14 +649,72 @@
   }
 
   function closeArtist(){
+    closePlayer();
     if (!overlay.classList.contains("open")) return;
     overlay.classList.remove("open");
     overlay.setAttribute("aria-hidden","true");
     document.body.classList.remove("locked");
     if (workIO){ workIO.disconnect(); workIO = null; }
     oWorks.querySelectorAll("video").forEach(detachHls);
-    setTimeout(function(){ oWorks.innerHTML = ""; }, 600);
+    clearTimer = setTimeout(function(){ oWorks.innerHTML = ""; clearTimer = null; }, 600);
     if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
+  }
+
+  // ---- Fullscreen player (ported from the published site) ----
+  var ICON = {
+    play:"<svg width='12' height='14' viewBox='0 0 12 14'><polygon points='0,0 12,7 0,14' fill='currentColor'/></svg>",
+    pause:"<svg width='11' height='14' viewBox='0 0 11 14'><rect x='0' y='0' width='3.4' height='14' fill='currentColor'/><rect x='7.6' y='0' width='3.4' height='14' fill='currentColor'/></svg>",
+    vol:"<svg width='42' height='13' viewBox='0 0 42 13'><polygon points='0,13 42,0 42,13' fill='currentColor'/></svg>",
+    close:"<svg width='15' height='15' viewBox='0 0 15 15'><line x1='1' y1='1' x2='14' y2='14' stroke='currentColor' stroke-width='1.4'/><line x1='14' y1='1' x2='1' y2='14' stroke='currentColor' stroke-width='1.4'/></svg>"
+  };
+  var curPlayer = null;
+  function openPlayer(url, isHls, contain){
+    closePlayer();
+    var root = document.createElement("div"); root.className = "vplayer";
+    var mark = document.createElement("a"); mark.className = "vplayer-mark"; mark.href = "#";
+    var mimg = document.createElement("img"); mimg.src = "/machina2/img/machina-logo-solid.png"; mimg.alt = "MACHINA"; mark.appendChild(mimg);
+    var video = document.createElement("video"); video.setAttribute("playsinline",""); video.playsInline = true;
+    if (contain) video.style.objectFit = "contain";
+    if (isHls) attachHls(video, url); else video.src = url;
+    var playBtn = document.createElement("button"); playBtn.className = "vp-btn"; playBtn.innerHTML = ICON.pause;
+    var volBtn = document.createElement("button"); volBtn.className = "vp-btn vp-vol"; volBtn.innerHTML = ICON.vol;
+    var closeBtn = document.createElement("button"); closeBtn.className = "vp-btn vp-close"; closeBtn.innerHTML = ICON.close;
+    var fill = document.createElement("div"); fill.className = "vp-fill";
+    var head = document.createElement("div"); head.className = "vp-head";
+    var track = document.createElement("div"); track.className = "vp-track"; track.appendChild(fill); track.appendChild(head);
+    var right = document.createElement("div"); right.className = "vp-right"; right.appendChild(volBtn); right.appendChild(closeBtn);
+    var controls = document.createElement("div"); controls.className = "vp-controls"; controls.appendChild(playBtn); controls.appendChild(right);
+    var bar = document.createElement("div"); bar.className = "vplayer-bar"; bar.appendChild(controls); bar.appendChild(track);
+    root.appendChild(mark); root.appendChild(video); root.appendChild(bar);
+    document.body.appendChild(root);
+    document.body.classList.add("vplayer-open");
+
+    function setPlay(p){ playBtn.innerHTML = p ? ICON.pause : ICON.play; }
+    function setMute(m){ volBtn.classList.toggle("off", m); }
+    function toggle(){ if (video.paused) video.play(); else video.pause(); }
+    playBtn.addEventListener("click", toggle);
+    video.addEventListener("click", toggle);
+    volBtn.addEventListener("click", function(){ video.muted = !video.muted; if (!video.muted && video.volume===0) video.volume = 1; setMute(video.muted); });
+    closeBtn.addEventListener("click", closePlayer);
+    mark.addEventListener("click", function(e){ e.preventDefault(); closePlayer(); });
+    track.addEventListener("click", function(e){ var r = track.getBoundingClientRect(); var x = (e.clientX - r.left)/r.width; if (video.duration) video.currentTime = Math.max(0,Math.min(1,x))*video.duration; });
+    video.addEventListener("timeupdate", function(){ if (video.duration){ var p = (Math.max(0,Math.min(1,video.currentTime/video.duration))*100).toFixed(3)+"%"; fill.style.width = p; head.style.left = p; } });
+    video.addEventListener("play", function(){ setPlay(true); });
+    video.addEventListener("pause", function(){ setPlay(false); });
+    var onKey = function(e){ if (e.key==="Escape") closePlayer(); else if (e.key===" "){ e.preventDefault(); toggle(); } else if (e.key==="m"||e.key==="M"){ video.muted = !video.muted; setMute(video.muted); } };
+    window.addEventListener("keydown", onKey);
+    video.muted = false; video.volume = 1; setMute(false); setPlay(true);
+    var pr = video.play(); if (pr && pr.catch) pr.catch(function(){ video.muted = true; setMute(true); video.play().catch(function(){}); });
+    curPlayer = { root:root, video:video, onKey:onKey };
+  }
+  function closePlayer(){
+    if (!curPlayer) return;
+    window.removeEventListener("keydown", curPlayer.onKey);
+    try{ curPlayer.video.pause(); }catch(e){}
+    detachHls(curPlayer.video);
+    if (curPlayer.root.parentNode) curPlayer.root.parentNode.removeChild(curPlayer.root);
+    document.body.classList.remove("vplayer-open");
+    curPlayer = null;
   }
 
   // Click an artist name in the Collective (either copy) -> open their deck
@@ -642,7 +723,9 @@
     if (name && name.dataset.artistId){ e.preventDefault(); openArtist(name.dataset.artistId); }
   });
   overlay.querySelector(".artist-back").addEventListener("click", closeArtist);
-  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeArtist(); });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !document.body.classList.contains("vplayer-open")) closeArtist();
+  });
 })();
 </script>
 </body>
