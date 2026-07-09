@@ -201,15 +201,9 @@
     .navlinks{gap:14px}
     .navlinks a{font-size:10px; letter-spacing:.08em}
     #navmark{width:74px}
-    /* The gun-barrel roll is a desktop scroll interaction; on phones show the
-       names as a simple static list over the film instead. */
-    .collective{height:100svh}
-    .roll-hint{display:none}
-    .roll{position:static; display:flex; flex-direction:column; align-items:flex-end;
-      justify-content:center; height:100%; gap:.15em; padding:0 var(--pad)}
-    .roll-name{position:static; top:auto; right:auto; transform:none !important;
-      opacity:1 !important; font-size:clamp(30px,7.5vw,48px)}
-    .roll-stage .eyebrow{top:calc(var(--pad) + 6vh)}
+    /* Keep the gun-barrel roll on mobile too (JS drives it); just size the names
+       for a phone so they fit and read. Separation is boosted 25% in the JS. */
+    .roll-name{font-size:clamp(30px,8vw,40px)}
   }
   @media (prefers-reduced-motion:reduce){
     .reveal{transition-duration:.4s; filter:none; transform:none}
@@ -228,6 +222,9 @@
   <video data-film="lipstick"    src="/scroll-assets/ysl-lipstick.mp4" autoplay muted loop playsinline preload="auto"></video>
   <video data-film="renjun"      src="/scroll-assets/ren-jun.mp4"      autoplay muted loop playsinline preload="auto"></video>
   <video data-film="descent"     src="/scroll-assets/layer-zero.mp4"   autoplay muted loop playsinline preload="auto"></video>
+  <!-- Collective featured films (HLS, lazy-attached when focused): Olga = ElevenLabs, Ghibli = Tommy Hilfiger -->
+  <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/9e8295b9-5572-4e2e-b43b-a98b2ed8350b/playlist.m3u8" muted loop playsinline preload="none"></video>
+  <video data-film="feat_ghibli" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/fd800681-6742-4613-ac48-2e8075837d54/playlist.m3u8" muted loop playsinline preload="none"></video>
   <div class="tint"></div>
 </div>
 <div id="grain"></div>
@@ -252,7 +249,8 @@
       <div class="logo reveal" style="--i:1"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
       <div class="lockup-label reveal" style="--i:2">Paris-Born Hybrid AI Collective</div>
     </div>
-    <div class="cornermeta br reveal" style="--i:3">Paris — New York</div>
+    <div class="cornermeta bl reveal" style="--i:3">Paris</div>
+    <div class="cornermeta br reveal" style="--i:3">New York</div>
     <div class="scrollcue">Scroll</div>
   </section>
 
@@ -400,9 +398,23 @@
   }, { threshold:0.16, rootMargin:"0px 0px -6% 0px" });
   document.querySelectorAll(".reveal").forEach(function(n){ io.observe(n); });
 
+  // ---- HLS helpers (shared by background films + artist decks) ----
+  function attachHls(video, url){
+    if (window.Hls && window.Hls.isSupported()){
+      var h = new window.Hls({ enableWorker:true, maxBufferLength:20 });
+      h.loadSource(url); h.attachMedia(video); video._hls = h;
+    } else { video.src = url; }   // Safari plays HLS natively
+  }
+  function detachHls(video){
+    if (video._hls){ try{ video._hls.destroy(); }catch(e){} video._hls = null; }
+    try{ video.pause(); video.removeAttribute("src"); video.load(); }catch(e){}
+  }
+
   // ---- Background films ----
   var videos = {};
   document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; });
+  // Collective featured film per focused member (roll order: Mauricio, Olga, Ghibli).
+  var FEATURED = ["descent","feat_olga","feat_ghibli"];
   var activeFilm = null;
   function setActiveFilm(film){
     if (film === "none") film = null;
@@ -410,8 +422,10 @@
     activeFilm = film;
     for (var k in videos){
       var v = videos[k];
-      if (k === film){ v.classList.add("active"); v.style.transform="translate3d(-50%,-50%,0)"; v.play().catch(function(){}); }
-      else { v.classList.remove("active"); try{ v.pause(); }catch(e){} }
+      if (k === film){
+        if (v.dataset.hls && !v._hls && !v.src) attachHls(v, v.dataset.hls);   // lazy HLS
+        v.classList.add("active"); v.style.transform="translate3d(-50%,-50%,0)"; v.play().catch(function(){});
+      } else { v.classList.remove("active"); try{ v.pause(); }catch(e){} }
     }
   }
 
@@ -449,7 +463,7 @@
   }
 
   function updateRoll(){
-    if (mqMobile.matches) return;   // mobile shows a static list (CSS)
+    var sep = mqMobile.matches ? 0.1375 : 0.11;   // 25% more separation on mobile
     for (var i=0;i<SB.length;i++){
       var b = SB[i]; if (!b.names || !b.names.length) continue;
       var p = (sy - b.top) / Math.max(1, b.h - vh);
@@ -458,7 +472,7 @@
       b.names.forEach(function(n, idx){
         var d = idx - f, ad = Math.abs(d);
         var scale = Math.max(0.42, 1 - 0.34*ad);
-        var y = d * (vh*0.11);
+        var y = d * (vh*sep);
         var op = Math.max(0.14, 1 - 0.58*ad);
         n.style.transform = "translateY(calc(-50% + " + y.toFixed(1) + "px)) scale(" + scale.toFixed(3) + ")";
         n.style.opacity = op.toFixed(3);
@@ -469,23 +483,32 @@
   function onScroll(){ sy = window.pageYOffset; wrap(); if(!ticking){ ticking = true; requestAnimationFrame(frame); } }
   function frame(){
     var center = sy + vh/2;
-    // active film + parallax from the run holding the viewport centre
+    // run holding the viewport centre (default film)
     var run = runs[0];
     for (var i=0;i<runs.length;i++){
       if (center >= runs[i].top && center < runs[i].bottom){ run = runs[i]; break; }
       if (i === runs.length-1) run = runs[i];
     }
-    setActiveFilm(run.film);
-    if (!reduce && run.film !== "none"){
-      var drift = -(sy - run.top) * PARALLAX;
+    // centered section: hero hides the wordmark; a collective makes the film follow the focused member
+    var onHero = false, coll = null;
+    for (var j=0;j<SB.length;j++){ var s=SB[j]; if (center>=s.top && center<s.top+s.h){ onHero = s.sec==="hero"; if (s.names) coll = s; break; } }
+
+    var film = run.film, anchor = run.top;
+    if (coll){
+      var cp = (sy - coll.top) / Math.max(1, coll.h - vh);
+      cp = Math.max(0, Math.min(1, cp));
+      var fi = Math.round(cp * (coll.names.length - 1));
+      film = FEATURED[fi] || film;
+      anchor = coll.top;
+    }
+    setActiveFilm(film);
+    if (!reduce && film !== "none"){
+      var drift = -(sy - anchor) * PARALLAX;
       var max = CLAMP_VH/100*vh;
       if (drift < -max) drift = -max; if (drift > max) drift = max;
-      var v = videos[run.film];
+      var v = videos[film];
       if (v) v.style.transform = "translate3d(-50%,calc(-50% + " + drift + "px),0)";
     }
-    // is a hero section under the viewport centre? (wordmark hides there)
-    var onHero = false;
-    for (var j=0;j<SB.length;j++){ var s=SB[j]; if (center>=s.top && center<s.top+s.h){ onHero = s.sec==="hero"; break; } }
     updateRoll();
     bar.style.width = (H>0 ? ((((sy%H)+H)%H)/H*100) : 0) + "%";
     mark.classList.toggle("show", !onHero);
@@ -560,17 +583,6 @@
   var oRole = overlay.querySelector(".artist-role");
   var oWorks = overlay.querySelector(".artist-works");
   var workIO = null;
-
-  function attachHls(video, url){
-    if (window.Hls && window.Hls.isSupported()){
-      var h = new window.Hls({ enableWorker:true, maxBufferLength:20 });
-      h.loadSource(url); h.attachMedia(video); video._hls = h;
-    } else { video.src = url; }   // Safari plays HLS natively
-  }
-  function detachHls(video){
-    if (video._hls){ try{ video._hls.destroy(); }catch(e){} video._hls = null; }
-    try{ video.pause(); video.removeAttribute("src"); video.load(); }catch(e){}
-  }
 
   function openArtist(id){
     var a = ARTISTS[id]; if (!a) return;
