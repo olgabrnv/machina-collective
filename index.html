@@ -37,12 +37,16 @@
   /* Keep the film + type in one isolated compositing context so mix-blend-mode
      inverts reliably (notably on iOS, where a fixed video otherwise won't blend). */
   #stage{isolation:isolate}
-  /* Lock horizontal movement — no sideways scroll/drift on mobile */
-  html{overflow-x:hidden; overscroll-behavior-x:none}
+  /* Lock horizontal movement — no sideways scroll/drift on mobile.
+     Use overflow-x:CLIP, not hidden: `hidden` turns html/body into a scroll
+     container, which breaks the Collective's position:sticky roll (the names
+     stop pinning and drag up the screen). `clip` blocks the same sideways
+     drift without creating a scroll container, so sticky keeps working. */
+  html{overflow-x:clip; overscroll-behavior-x:none}
   body{
     background:var(--bg); color:var(--fg);
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased; overflow-x:hidden; overscroll-behavior-x:none;
+    -webkit-font-smoothing:antialiased; overflow-x:clip; overscroll-behavior-x:none;
     width:100%; max-width:100%; position:relative; touch-action:pan-y;
   }
 
