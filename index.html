@@ -139,8 +139,11 @@
     font-size:clamp(11px,1.1vw,14px); letter-spacing:.18em; text-transform:uppercase; mix-blend-mode:difference}
 
   /* ---------- Collective (gun-barrel roll) ---------- */
-  .collective{height:200vh; padding:0; display:block}
-  .roll-stage{position:sticky; top:0; height:100svh; overflow:hidden}
+  /* Section is exactly 2x the sticky stage, both in dvh so they track the live
+     viewport height the JS roll uses (window.innerHeight). Mixing vh + svh here
+     broke the ratio on mobile: the roll finished early and left dead space. */
+  .collective{height:200dvh; padding:0; display:block}
+  .roll-stage{position:sticky; top:0; height:100dvh; overflow:hidden}
   .roll-stage .eyebrow{position:absolute; top:calc(var(--pad) + 8vh); right:var(--pad); margin:0}
   .roll{position:absolute; inset:0}
   .roll-name{position:absolute; top:50%; right:var(--pad); transform-origin:right center;
