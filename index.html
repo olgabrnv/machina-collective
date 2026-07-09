@@ -37,10 +37,13 @@
   /* Keep the film + type in one isolated compositing context so mix-blend-mode
      inverts reliably (notably on iOS, where a fixed video otherwise won't blend). */
   #stage{isolation:isolate}
+  /* Lock horizontal movement — no sideways scroll/drift on mobile */
+  html{overflow-x:hidden; overscroll-behavior-x:none}
   body{
     background:var(--bg); color:var(--fg);
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden; overscroll-behavior-x:none;
+    width:100%; max-width:100%; position:relative;
   }
 
   /* ---------- Sequenced, parallaxing background films ---------- */
@@ -474,18 +477,18 @@
 
       <div class="cstep">
         <div class="crow">
-          <div class="cfield"><label>First name <span class="req">*</span></label><input name="first-name" placeholder="Enter your first name" required></div>
-          <div class="cfield"><label>Last name <span class="req">*</span></label><input name="last-name" placeholder="Enter your last name" required></div>
+          <div class="cfield"><label>First name</label><input name="first-name" placeholder="Enter your first name"></div>
+          <div class="cfield"><label>Last name</label><input name="last-name" placeholder="Enter your last name"></div>
         </div>
-        <div class="cfield"><label>Email <span class="req">*</span></label><input type="email" name="email" placeholder="Enter your email" required></div>
-        <div class="cfield"><label>Brand / Company <span class="req">*</span></label><input name="company" placeholder="Company or brand name" required></div>
-        <div class="cfield"><label>Company Website <span class="req">*</span></label><input name="website" placeholder="https://…" required></div>
+        <div class="cfield"><label>Email</label><input type="email" name="email" placeholder="Enter your email"></div>
+        <div class="cfield"><label>Brand / Company</label><input name="company" placeholder="Company or brand name"></div>
+        <div class="cfield"><label>Company Website</label><input name="website" placeholder="https://…"></div>
       </div>
 
       <div class="cstep">
-        <div class="cfield"><label>Select a project type <span class="req">*</span></label>
+        <div class="cfield"><label>Select a project type</label>
           <div class="chips">
-            <input type="radio" id="pt1" name="project-type" value="Campaign Production" required><label for="pt1">Campaign Production</label>
+            <input type="radio" id="pt1" name="project-type" value="Campaign Production"><label for="pt1">Campaign Production</label>
             <input type="radio" id="pt2" name="project-type" value="AI Production System"><label for="pt2">AI Production System</label>
             <input type="radio" id="pt3" name="project-type" value="Content at Scale"><label for="pt3">Content at Scale</label>
             <input type="radio" id="pt4" name="project-type" value="Training or Workshop"><label for="pt4">Training or Workshop</label>
@@ -494,14 +497,14 @@
       </div>
 
       <div class="cstep">
-        <div class="cfield"><label>Tell us about your idea <span class="req">*</span></label>
-          <textarea name="project-details" placeholder="Enter project details…" required></textarea></div>
+        <div class="cfield"><label>Tell us about your idea</label>
+          <textarea name="project-details" placeholder="Enter project details…"></textarea></div>
       </div>
 
       <div class="cstep">
-        <div class="cfield"><label>Budget in USD <span class="req">*</span></label>
+        <div class="cfield"><label>Budget in USD</label>
           <div class="chips">
-            <input type="radio" id="b1" name="budget" value="$10K–25K" required><label for="b1">$10K–25K</label>
+            <input type="radio" id="b1" name="budget" value="$10K–25K"><label for="b1">$10K–25K</label>
             <input type="radio" id="b2" name="budget" value="$25K–50K"><label for="b2">$25K–50K</label>
             <input type="radio" id="b3" name="budget" value="$50K–100K"><label for="b3">$50K–100K</label>
             <input type="radio" id="b4" name="budget" value="$100K–250K"><label for="b4">$100K–250K</label>
