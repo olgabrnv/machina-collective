@@ -11,3 +11,6 @@ Archive/
 *.mov
 *.mp4
 *.pdf
+
+# Prototype source-image folder (web copies live in scroll-assets/)
+The team/

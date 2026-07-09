@@ -17,7 +17,11 @@
     src:url("/machina3/fonts/BebasNeue-Regular.ttf") format("truetype");
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  /* No global smooth scroll — the loop's teleport must be instant. Nav links
+     request smooth scrolling explicitly in JS instead. */
+  /* Keep the film + type in one isolated compositing context so mix-blend-mode
+     inverts reliably (notably on iOS, where a fixed video otherwise won't blend). */
+  #stage{isolation:isolate}
   body{
     background:var(--bg); color:var(--fg);
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -45,19 +49,24 @@
     mix-blend-mode:overlay;
   }
 
-  /* ---------- Fixed chrome (corner wordmark + progress) ---------- */
-  .chrome{position:fixed; z-index:5; mix-blend-mode:difference; pointer-events:none}
-  #mark{
-    top:var(--pad); left:var(--pad); width:clamp(96px,9vw,150px);
-    opacity:0; transition:opacity .8s var(--ease);
-  }
-  #mark.show{opacity:1}
-  #mark img{width:100%; display:block}
-  #progress{position:fixed; top:0; left:0; height:2px; width:0; z-index:6;
+  /* ---------- Top navigation (persistent) ---------- */
+  #topnav{position:fixed; top:0; left:0; right:0; z-index:7; display:flex; align-items:center;
+    justify-content:space-between; padding:var(--pad); mix-blend-mode:difference; pointer-events:none}
+  #navmark{width:clamp(96px,9vw,140px); opacity:0; transition:opacity .6s var(--ease); pointer-events:auto}
+  #navmark.show{opacity:1}
+  #navmark img{width:100%; display:block}
+  .navlinks{display:flex; gap:clamp(18px,3vw,54px); pointer-events:auto}
+  .navlinks a{color:var(--fg); text-decoration:none; font-size:clamp(10px,1vw,13px);
+    letter-spacing:.18em; text-transform:uppercase; opacity:.8; transition:opacity .3s}
+  .navlinks a:hover{opacity:1}
+  #progress{position:fixed; top:0; left:0; height:2px; width:0; z-index:8;
     background:var(--accent); opacity:.9; will-change:width}
 
   /* ---------- Sections ---------- */
-  main{position:relative; z-index:2}
+  /* No z-index here: keeping the content layer OUT of its own stacking context
+     lets every mix-blend-mode:difference text element invert against the fixed
+     background film behind it (the same effect as the corner wordmark). */
+  main{position:relative}
   .sec{
     position:relative; min-height:100svh; width:100%;
     padding:calc(var(--pad) + 3vh) var(--pad);
@@ -74,11 +83,11 @@
     color:var(--fg); mix-blend-mode:difference; margin-bottom:1.4em;
   }
   .statement{
-    font-weight:700; text-transform:uppercase; line-height:1.02;
-    letter-spacing:-.01em; font-size:clamp(30px,4.6vw,74px);
-    mix-blend-mode:difference; max-width:22ch;
+    font-family:"Bebas Neue","Helvetica Neue",sans-serif; font-weight:400;
+    text-transform:uppercase; line-height:.86;
+    letter-spacing:-.01em; font-size:clamp(28px,3.9vw,60px);
+    mix-blend-mode:difference; max-width:26ch;
   }
-  .statement .dim{color:var(--fg-dim)}
   .sub{
     margin-top:2.2em; max-width:44ch; line-height:1.4; text-transform:uppercase; letter-spacing:.02em;
     font-size:clamp(14px,1.35vw,19px); color:var(--fg); mix-blend-mode:difference;
@@ -88,17 +97,16 @@
   .sec.right .statement{max-width:20ch}
   .sec.left  .statement, .sec.left  .sub, .sec.left  .eyebrow{text-align:left}
 
-  /* Hero */
-  #hero .logo{width:min(58vw,760px)}
-  #hero .logo img{width:100%; display:block}
-  #hero .tag{margin-top:1.6em; font-size:clamp(11px,1.1vw,14px);
-    letter-spacing:.24em; text-transform:uppercase; mix-blend-mode:difference}
-  #hero .kicker{margin-bottom:1.6em; font-size:clamp(10px,.9vw,12px);
-    letter-spacing:.24em; text-transform:uppercase; color:var(--fg); mix-blend-mode:difference}
+  /* Hero lockup: labels flush to the wordmark's left edge, top and bottom */
+  .hero-lockup{width:min(46vw,570px); text-align:left}
+  .hero-lockup .logo{width:100%}
+  .hero-lockup .logo img{width:100%; display:block; mix-blend-mode:difference}
+  .lockup-label{font-size:clamp(11px,1vw,14px); letter-spacing:.22em; line-height:1.4;
+    text-transform:uppercase; mix-blend-mode:difference; text-align:left}
+  .hero-lockup .lockup-label:first-child{margin:0 0 .8em}
+  .hero-lockup .lockup-label:last-child{margin:.8em 0 0}
   .cornermeta{position:absolute; z-index:3; font-size:11px; letter-spacing:.14em;
     line-height:1.5; text-transform:uppercase; mix-blend-mode:difference; opacity:.85; text-align:left}
-  .cornermeta.tl{top:var(--pad); left:var(--pad)}
-  .cornermeta.tr{top:var(--pad); right:var(--pad); text-align:right}
   .cornermeta.bl{bottom:var(--pad); left:var(--pad)}
   .cornermeta.br{bottom:var(--pad); right:var(--pad); text-align:right}
   .scrollcue{position:absolute; bottom:calc(var(--pad) + 1vh); left:50%; transform:translateX(-50%);
@@ -106,25 +114,45 @@
     animation:bob 2.4s var(--ease) infinite}
   @keyframes bob{0%,100%{transform:translate(-50%,0);opacity:.5}50%{transform:translate(-50%,6px);opacity:1}}
 
+  /* Film-moment caption (small, bottom corner) */
+  .filmcap{position:absolute; bottom:var(--pad); left:var(--pad); z-index:3;
+    font-size:clamp(11px,1.1vw,14px); letter-spacing:.18em; text-transform:uppercase; mix-blend-mode:difference}
+
+  /* ---------- Collective (gun-barrel roll) ---------- */
+  .collective{height:200vh; padding:0; display:block}
+  .roll-stage{position:sticky; top:0; height:100svh; overflow:hidden}
+  .roll-stage .eyebrow{position:absolute; top:calc(var(--pad) + 8vh); right:var(--pad); margin:0}
+  .roll{position:absolute; inset:0}
+  .roll-name{position:absolute; top:50%; right:var(--pad); transform-origin:right center;
+    white-space:nowrap; cursor:pointer; pointer-events:auto;
+    font-family:"Bebas Neue","Helvetica Neue",sans-serif; font-weight:400; text-transform:uppercase;
+    letter-spacing:-.01em; font-size:clamp(28px,3.9vw,60px); line-height:1;
+    color:var(--fg); mix-blend-mode:difference; will-change:transform,opacity}
+  .roll-hint{position:absolute; bottom:var(--pad); left:var(--pad); z-index:3;
+    font-size:10px; letter-spacing:.3em; text-transform:uppercase; mix-blend-mode:difference; opacity:.6}
+
   /* Capabilities grid */
   .caps{display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,4vw,64px);
     width:100%; max-width:1200px; margin-left:auto}
   .cap{border-top:1px solid var(--rule); padding-top:1em}
-  .cap h3{font-weight:500; text-transform:uppercase; letter-spacing:.02em; font-size:clamp(16px,1.5vw,22px); margin:0 0 .8em}
+  .cap h3{font-family:"Bebas Neue","Helvetica Neue",sans-serif; font-weight:400; text-transform:uppercase;
+    letter-spacing:.03em; font-size:clamp(20px,2.1vw,30px); margin:0 0 .55em}
   .cap ul{list-style:none; color:var(--fg-dim); text-transform:uppercase; letter-spacing:.02em; line-height:1.7; font-size:clamp(13px,1.1vw,16px)}
 
-  /* Clients */
-  .clients{display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(40px,6vw,90px);
-    width:100%; max-width:1100px; place-items:center; text-align:center;
-    margin-top:clamp(56px,11vh,150px)}
-  .clients span{font-size:clamp(20px,2.4vw,38px); letter-spacing:.02em; text-transform:uppercase; mix-blend-mode:difference}
+  /* Clients (logo lockup image) */
+  .clients-img{width:100%; max-width:min(1920px,96vw); aspect-ratio:4152/2164; height:auto; display:block; margin:clamp(36px,6vh,84px) auto 0}
 
-  /* The Unit */
-  .unit{display:flex; gap:clamp(16px,2vw,28px); flex-wrap:wrap}
-  .unit figure{width:clamp(120px,13vw,190px)}
-  .unit img{width:100%; aspect-ratio:1/1; object-fit:cover; filter:grayscale(1) contrast(1.05); display:block}
-  .unit figcaption{margin-top:.7em; font-size:12px; letter-spacing:.06em; text-transform:uppercase}
-  .unit figcaption small{display:block; color:var(--fg-dim); text-transform:uppercase; letter-spacing:.04em; margin-top:.3em}
+  /* The Unit — founders (larger) on top, team (smaller) below; all left-aligned */
+  .unit{display:flex; gap:clamp(20px,2.4vw,40px); flex-wrap:wrap; align-items:flex-start}
+  .unit-team{margin-top:clamp(30px,4.5vh,72px)}
+  .unit-lead figure{width:clamp(180px,21vw,310px)}
+  .unit-team figure{width:clamp(150px,16vw,244px)}
+  .unit img{width:100%; aspect-ratio:1/1; object-fit:cover; filter:grayscale(1) contrast(1.03); display:block}
+  .unit figcaption{margin-top:1em; text-align:left}
+  .unit figcaption b{display:block; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    font-size:clamp(13px,1.15vw,17px)}
+  .unit figcaption span{display:block; color:var(--fg-dim); font-weight:400; margin-top:.45em; line-height:1.35;
+    font-size:clamp(12px,1vw,15px)}
 
   /* End */
   #end .big{font-family:"Bebas Neue",sans-serif; font-size:clamp(70px,16vw,240px);
@@ -140,9 +168,22 @@
 
   @media (max-width:760px){
     .caps{grid-template-columns:1fr}
-    .clients{grid-template-columns:1fr 1fr; gap:44px}
     .sec.right{align-items:flex-start; text-align:left}
     .statement{max-width:none}
+    .hero-lockup{width:82vw}
+    #topnav{padding:16px}
+    .navlinks{gap:14px}
+    .navlinks a{font-size:10px; letter-spacing:.08em}
+    #navmark{width:74px}
+    /* The gun-barrel roll is a desktop scroll interaction; on phones show the
+       names as a simple static list over the film instead. */
+    .collective{height:100svh}
+    .roll-hint{display:none}
+    .roll{position:static; display:flex; flex-direction:column; align-items:flex-end;
+      justify-content:center; height:100%; gap:.15em; padding:0 var(--pad)}
+    .roll-name{position:static; top:auto; right:auto; transform:none !important;
+      opacity:1 !important; font-size:clamp(30px,7.5vw,48px)}
+    .roll-stage .eyebrow{top:calc(var(--pad) + 6vh)}
   }
   @media (prefers-reduced-motion:reduce){
     .reveal{transition-duration:.4s; filter:none; transform:none}
@@ -152,33 +193,58 @@
 </style>
 </head>
 <body>
+<div id="stage">
 
-<!-- Background film stack: one <video> per unique film, cross-faded on scroll -->
+<!-- Background film stack: one <video> per unique film, cross-faded on scroll/hover -->
 <div id="bg">
-  <video data-film="splash" src="/scroll-assets/splash-page.mp4" muted loop playsinline preload="auto"></video>
-  <video data-film="ysl"    src="/scroll-assets/ysl-libre.mp4"   muted loop playsinline preload="auto"></video>
+  <video data-film="splashdesat" src="/scroll-assets/splash-desat.mp4"  autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="ysl"         src="/scroll-assets/ysl-libre.mp4"    autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="lipstick"    src="/scroll-assets/ysl-lipstick.mp4" autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="renjun"      src="/scroll-assets/ren-jun.mp4"      autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="descent"     src="/scroll-assets/layer-zero.mp4"   autoplay muted loop playsinline preload="auto"></video>
   <div class="tint"></div>
 </div>
 <div id="grain"></div>
+
+<nav id="topnav">
+  <a id="navmark" href="#" data-target="hero"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></a>
+  <div class="navlinks">
+    <a href="#" data-target="collective">Collective</a>
+    <a href="#" data-target="whoweare">About</a>
+    <a href="#" data-soon="1">Lab</a>
+    <a href="https://www.instagram.com/machina_collective/" target="_blank" rel="noopener">Instagram</a>
+  </div>
+</nav>
 <div id="progress"></div>
-<div class="chrome" id="mark"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
 
 <main>
 
-  <!-- 01 HERO -->
-  <section class="sec center" id="hero" data-film="splash">
-    <div class="cornermeta tl reveal">A Director-led studio<br>for luxury and beauty</div>
-    <div class="cornermeta tr reveal">©2026</div>
-    <div class="kicker reveal">A Ghibli Media Division</div>
-    <div class="logo reveal" style="--i:1"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
-    <div class="tag reveal" style="--i:2">Paris-born hybrid AI collective</div>
-    <div class="cornermeta bl reveal" style="--i:3">Classical craft at the core<br>Human touch preserved<br>Technology elevated</div>
+  <!-- 01 HERO — desaturated splash film -->
+  <section class="sec center" id="hero" data-sec="hero" data-film="splashdesat">
+    <div class="hero-lockup">
+      <div class="lockup-label reveal">A Ghibli Media Division</div>
+      <div class="logo reveal" style="--i:1"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
+      <div class="lockup-label reveal" style="--i:2">Paris-Born Hybrid AI Collective</div>
+    </div>
     <div class="cornermeta br reveal" style="--i:3">Paris — New York</div>
     <div class="scrollcue">Scroll</div>
   </section>
 
-  <!-- 02 WHO WE ARE -->
-  <section class="sec right" data-film="splash">
+  <!-- 02 THE COLLECTIVE — artist work plays behind the gun-barrel roll -->
+  <section id="collective" class="collective" data-sec="collective" data-film="descent">
+    <div class="roll-stage">
+      <div class="eyebrow">[ → ] The collective</div>
+      <div class="roll">
+        <div class="roll-name" data-artist="descent">Mauricio Sierra</div>
+        <div class="roll-name" data-artist="descent">Olga Baranova</div>
+        <div class="roll-name" data-artist="descent">Ghibli Media</div>
+      </div>
+      <div class="roll-hint">Scroll to roll</div>
+    </div>
+  </section>
+
+  <!-- 03 WHO WE ARE — desaturated splash film behind -->
+  <section class="sec right" id="whoweare" data-sec="whoweare" data-film="splashdesat">
     <div class="wrap" style="max-width:960px">
       <div class="eyebrow reveal">[ → ] Who we are</div>
       <h2 class="statement reveal" style="--i:1">Machina operates at the intersection of art, technology, and intelligence. We are a collective of artists. Brands bring us in at the idea, and we author it through to the final frame, at the level luxury demands.</h2>
@@ -186,21 +252,7 @@
     </div>
   </section>
 
-  <!-- 03 CAPABILITIES -->
-  <section class="sec right" data-film="splash">
-    <div class="wrap">
-      <div class="eyebrow reveal">[ → ] Our capabilities</div>
-      <div class="caps">
-        <div class="cap reveal"><h3>Creative Direction</h3><ul><li>Concept Development</li><li>Narrative &amp; World Building</li><li>Campaign Systems</li><li>AI Art Direction</li></ul></div>
-        <div class="cap reveal" style="--i:1"><h3>Systems &amp; Pipeline</h3><ul><li>AI Workflow Design</li><li>Custom Model Training</li><li>Production Pipelines</li><li>Automation &amp; Scaling</li><li>Tool Integration</li></ul></div>
-        <div class="cap reveal" style="--i:1"><h3>Hybrid Production</h3><ul><li>360 Executive Hybrid production</li><li>AI Video &amp; Motion</li><li>World building</li><li>Digital Environments</li></ul></div>
-        <div class="cap reveal" style="--i:2"><h3>Training &amp; Education</h3><ul><li>Corporate Training</li><li>Creative Workshops</li><li>AI for Creative Team</li><li>Workflow Implementation</li></ul></div>
-        <div class="cap reveal" style="--i:1"><h3>Content &amp; Visuals</h3><ul><li>Hybrid and AI-only Campaign</li><li>Still &amp; Motion Generation</li><li>Product Visualization</li><li>Model &amp; Talent Systems</li><li>Post: Editing, Color, Retouch</li></ul></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 04 WHAT WE DO  (YSL Libre bottle takes over) -->
+  <!-- 04 WHAT WE DO — YSL Libre film behind the text -->
   <section class="sec left" data-film="ysl">
     <div class="wrap" style="max-width:1100px">
       <div class="eyebrow reveal">[ → ] What we do</div>
@@ -208,15 +260,18 @@
     </div>
   </section>
 
-  <!-- 05 SCALE -->
-  <section class="sec right" data-film="ysl">
+  <!-- 05 YSL LIPSTICK — film moment (no title), continues the YSL run -->
+  <section class="sec left" data-film="lipstick"></section>
+
+  <!-- 07 SCALE — YSL Lipstick film continues behind this text -->
+  <section class="sec right" data-film="lipstick">
     <div class="wrap" style="max-width:900px">
-      <h2 class="statement reveal">We have developed a new way of working. So the work scales creatively and volumetrically without losing its signature.</h2>
+      <h2 class="statement reveal">We have developed a new way of working, so the work scales creatively and volumetrically without losing its signature.</h2>
     </div>
   </section>
 
-  <!-- 06 WHY -->
-  <section class="sec left" data-film="ysl">
+  <!-- 08 WHY — ren & jun rotation film behind statement + second paragraph -->
+  <section class="sec left" data-film="renjun">
     <div class="wrap" style="max-width:1100px">
       <div class="eyebrow reveal">[ → ] Why we do it</div>
       <h2 class="statement reveal" style="--i:1">Craft is the only difference left when anyone can generate anything.</h2>
@@ -224,141 +279,217 @@
     </div>
   </section>
 
-  <!-- 07 SYSTEMS -->
-  <section class="sec left" data-film="ysl">
+  <!-- 09 SYSTEMS — black -->
+  <section class="sec left" data-film="none">
     <div class="wrap" style="max-width:900px">
       <h2 class="statement reveal">We believe in systems over shortcuts. AI is a new render engine in service of human creativity — a higher level of precision, consistency and control.</h2>
     </div>
   </section>
 
-  <!-- 08 CLIENTS  (back to the chrome splash world) -->
-  <section class="sec center" data-film="splash">
+  <!-- 10 CAPABILITIES — black -->
+  <section class="sec right" data-film="none">
+    <div class="wrap">
+      <div class="eyebrow reveal">[ → ] Our capabilities</div>
+      <div class="caps">
+        <div class="cap reveal"><h3>Creative Direction</h3><ul><li>Concept Development</li><li>Narrative &amp; World Building</li><li>Campaign Systems</li><li>AI Art Direction</li></ul></div>
+        <div class="cap reveal" style="--i:1"><h3>Hybrid Production</h3><ul><li>360 Executive Hybrid production</li><li>AI Video &amp; Motion</li><li>World building</li><li>Digital Environments</li></ul></div>
+        <div class="cap reveal" style="--i:1"><h3>Content &amp; Visuals</h3><ul><li>Hybrid and AI-only Campaign</li><li>Still &amp; Motion Generation</li><li>Product Visualization</li><li>Model &amp; Talent Systems</li><li>Post: Editing, Color, Retouch</li></ul></div>
+        <div class="cap reveal" style="--i:2"><h3>Systems &amp; Pipeline</h3><ul><li>AI Workflow Design</li><li>Custom Model Training</li><li>Production Pipelines</li><li>Automation &amp; Scaling</li><li>Tool Integration</li></ul></div>
+        <div class="cap reveal" style="--i:2"><h3>Training &amp; Education</h3><ul><li>Corporate Training</li><li>Creative Workshops</li><li>AI for Creative Team</li><li>Workflow Implementation</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 SELECTED CLIENTS — black, logo lockup -->
+  <section class="sec center" id="clients" data-film="none">
     <div class="wrap">
       <div class="eyebrow reveal" style="text-align:center">[ → ] Selected clients</div>
-      <div class="clients">
-        <span class="reveal">L'ORÉAL</span>
-        <span class="reveal" style="--i:1">Google</span>
-        <span class="reveal" style="--i:2">Yves Saint Laurent</span>
-        <span class="reveal" style="--i:1">Estée Lauder</span>
-        <span class="reveal" style="--i:2">Kilian</span>
-        <span class="reveal" style="--i:3">VOGUE</span>
-      </div>
+      <img class="clients-img reveal" style="--i:1" src="/scroll-assets/selected-clients.png" alt="Selected clients: L'Oréal, Google, Yves Saint Laurent, Estée Lauder, Kilian, Vogue">
     </div>
   </section>
 
-  <!-- 09 THE UNIT -->
-  <section class="sec left" data-film="splash">
+  <!-- 12 THE UNIT — founders (larger) on top, team (smaller) below -->
+  <section class="sec left" data-film="none">
     <div class="wrap">
       <div class="eyebrow reveal">[ → ] The unit</div>
-      <div class="unit">
-        <figure class="reveal"><img src="/machina2/img/portrait-mauricio.png" alt=""><figcaption>Mauricio Sierra<small>Founder + Chief Creative Officer</small></figcaption></figure>
-        <figure class="reveal" style="--i:1"><img src="/machina2/img/portrait-olga.jpg" alt=""><figcaption>Olga Baranova<small>Co-Founder + Creative Technologist</small></figcaption></figure>
-        <figure class="reveal" style="--i:2"><img src="/machina2/img/portrait-ghibli.jpg" alt=""><figcaption>Sabine Mañas<small>Co-Founder + Executive Producer</small></figcaption></figure>
+      <div class="unit unit-lead">
+        <figure class="reveal"><img src="/scroll-assets/team/mauricio.png" alt="Mauricio Sierra"><figcaption><b>Mauricio Sierra</b><span>Director. Founder + Chief Creative Officer</span></figcaption></figure>
+        <figure class="reveal" style="--i:1"><img src="/scroll-assets/team/sabine.png" alt="Sabine Mañas"><figcaption><b>Sabine Mañas</b><span>Co-Founder + Executive Producer, Ghibli Media</span></figcaption></figure>
+        <figure class="reveal" style="--i:2"><img src="/scroll-assets/team/olga.png" alt="Olga Baranova"><figcaption><b>Olga Baranova</b><span>Co-Founder + Creative Technologist</span></figcaption></figure>
       </div>
-      <p class="sub reveal" style="--i:2; max-width:52ch">Machina is a director-led collective. Every project is authored and directed by Mauricio Sierra — one eye holding the vision from concept to final frame. Craft is the foundation. Technology, the amplifier.</p>
+      <div class="unit unit-team">
+        <figure class="reveal"><img src="/scroll-assets/team/diane.png" alt="Diane Kozłowski"><figcaption><b>Diane Kozłowski</b><span>Project Manager + Post-Producer</span></figcaption></figure>
+        <figure class="reveal" style="--i:1"><img src="/scroll-assets/team/julien.png" alt="Julien Coulaud"><figcaption><b>Julien Coulaud</b><span>Senior Software Developer</span></figcaption></figure>
+        <figure class="reveal" style="--i:2"><img src="/scroll-assets/team/dester.png" alt="Dester Linares"><figcaption><b>Dester Linares</b><span>Visual Storyteller Editor</span></figcaption></figure>
+        <figure class="reveal" style="--i:3"><img src="/scroll-assets/team/santiago.png" alt="Santiago Fauchier"><figcaption><b>Santiago Fauchier</b><span>Music Composer + Sound Design</span></figcaption></figure>
+      </div>
     </div>
   </section>
 
-  <!-- 10 THE WORK / END -->
-  <section class="sec center" id="end" data-film="splash">
-    <div class="wrap">
-      <div class="big reveal">THE WORK</div>
-      <button class="loop reveal" style="--i:1" id="toTop">↑ Back to the top</button>
-    </div>
-  </section>
+  <!-- (Hero is cloned here by JS so scrolling past The Unit wraps seamlessly to the top.) -->
 
 </main>
+
+</div><!-- /#stage -->
 
 <script>
 (function(){
   // ---- Tunables -----------------------------------------------------------
-  var PARALLAX = 0.28;   // BG speed vs scroll (was 0.15). Higher = faster BG motion.
+  var PARALLAX = 0.28;   // BG speed vs scroll. Higher = faster BG motion.
   var CLAMP_VH = 26;     // max BG drift each way, in vh (keeps film edges hidden)
   // -------------------------------------------------------------------------
 
   var reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+  var mqMobile = matchMedia("(max-width:760px)");   // must match the CSS breakpoint exactly
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  var main = document.querySelector("main");
 
-  // ---- Reveal type as it scrolls into view (one-shot, elegant) ----
+  // ---- Duplicate all content once so the DOWNWARD loop has runway: when you
+  // scroll past the last section you're actually entering an identical second
+  // copy, and we teleport back by one copy at the seam (invisible). ----
+  var originals = Array.prototype.slice.call(main.children);
+  originals.forEach(function(sec){
+    var c = sec.cloneNode(true);
+    c.removeAttribute("id");
+    c.setAttribute("data-clone","1");
+    main.appendChild(c);
+  });
+  var firstCloneIndex = originals.length;
+
+  // ---- Reveal type as it scrolls into view (one-shot), across both copies ----
   var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
-    });
-  }, { threshold:0.18, rootMargin:"0px 0px -8% 0px" });
+    entries.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { threshold:0.16, rootMargin:"0px 0px -6% 0px" });
   document.querySelectorAll(".reveal").forEach(function(n){ io.observe(n); });
 
-  var videos = {};       // film name -> <video>
+  // ---- Background films ----
+  var videos = {};
   document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; });
-
-  // Build "runs": contiguous sections that share the same film.
-  var secs = Array.prototype.slice.call(document.querySelectorAll("main .sec"));
-  var runs = [];
-  secs.forEach(function(s){
-    var film = s.dataset.film;
-    var last = runs[runs.length-1];
-    if (last && last.film === film) last.sections.push(s);
-    else runs.push({ film:film, sections:[s] });
-  });
-
-  function runBounds(run){
-    var top = run.sections[0].offsetTop;
-    var lastS = run.sections[run.sections.length-1];
-    var bottom = lastS.offsetTop + lastS.offsetHeight;
-    return { top:top, bottom:bottom };
-  }
-
-  var mark = document.getElementById("mark");
-  var bar  = document.getElementById("progress");
-  var vh   = window.innerHeight;
   var activeFilm = null;
-
   function setActiveFilm(film){
+    if (film === "none") film = null;
     if (film === activeFilm) return;
     activeFilm = film;
     for (var k in videos){
       var v = videos[k];
-      if (k === film){ v.classList.add("active"); v.play().catch(function(){}); }
+      if (k === film){ v.classList.add("active"); v.style.transform="translate3d(-50%,-50%,0)"; v.play().catch(function(){}); }
       else { v.classList.remove("active"); try{ v.pause(); }catch(e){} }
     }
   }
 
-  var ticking = false, sy = 0;
-  function onScroll(){ sy = window.pageYOffset; if(!ticking){ ticking = true; requestAnimationFrame(frame); } }
+  // ---- Cached layout: section bounds, film runs, loop length (H) ----
+  var mark = document.getElementById("navmark");
+  var bar  = document.getElementById("progress");
+  var vh = window.innerHeight, ticking = false, sy = 0;
+  var SB = [], runs = [], H = 0, loopOn = false, navLock = 0;
+
+  function layout(){
+    vh = window.innerHeight;
+    SB = Array.prototype.slice.call(main.children).map(function(el){
+      return { top: el.offsetTop, h: el.offsetHeight,
+               sec: el.getAttribute("data-sec"), film: el.dataset.film || "none",
+               names: el.classList.contains("collective")
+                        ? Array.prototype.slice.call(el.querySelectorAll(".roll-name")) : null };
+    });
+    runs = [];
+    SB.forEach(function(b){
+      var last = runs[runs.length-1];
+      if (last && last.film === b.film) last.bottom = b.top + b.h;
+      else runs.push({ film:b.film, top:b.top, bottom:b.top + b.h });
+    });
+    H = SB[firstCloneIndex] ? SB[firstCloneIndex].top : 0;
+    loopOn = H > vh * 2;
+  }
+
+  // DOWNWARD-ONLY loop. Start at the very top (the hero is a hard ceiling — you
+  // can't scroll up past it). Scrolling down, once you cross into the second copy
+  // (sy >= H) we teleport back by exactly one copy (−H) onto a pixel-identical
+  // view, so the bottom seamlessly becomes the top again. Scrolling up never wraps.
+  function wrap(){
+    if (!loopOn || navLock) return;
+    if (sy >= H){ sy -= H; window.scrollTo(0, sy); }
+  }
+
+  function updateRoll(){
+    if (mqMobile.matches) return;   // mobile shows a static list (CSS)
+    for (var i=0;i<SB.length;i++){
+      var b = SB[i]; if (!b.names || !b.names.length) continue;
+      var p = (sy - b.top) / Math.max(1, b.h - vh);
+      p = Math.max(0, Math.min(1, p));
+      var f = p * (b.names.length - 1);
+      b.names.forEach(function(n, idx){
+        var d = idx - f, ad = Math.abs(d);
+        var scale = Math.max(0.42, 1 - 0.34*ad);
+        var y = d * (vh*0.11);
+        var op = Math.max(0.14, 1 - 0.58*ad);
+        n.style.transform = "translateY(calc(-50% + " + y.toFixed(1) + "px)) scale(" + scale.toFixed(3) + ")";
+        n.style.opacity = op.toFixed(3);
+      });
+    }
+  }
+
+  function onScroll(){ sy = window.pageYOffset; wrap(); if(!ticking){ ticking = true; requestAnimationFrame(frame); } }
   function frame(){
     var center = sy + vh/2;
-    // Which run holds the viewport center?
-    var run = runs[0], b = runBounds(run);
+    // active film + parallax from the run holding the viewport centre
+    var run = runs[0];
     for (var i=0;i<runs.length;i++){
-      var rb = runBounds(runs[i]);
-      if (center >= rb.top && center < rb.bottom){ run = runs[i]; b = rb; break; }
-      if (i === runs.length-1){ run = runs[i]; b = rb; }
+      if (center >= runs[i].top && center < runs[i].bottom){ run = runs[i]; break; }
+      if (i === runs.length-1) run = runs[i];
     }
     setActiveFilm(run.film);
-
-    if (!reduce){
-      // Parallax the active film: drift grows as you scroll into the run, re-anchored
-      // at each run's top so a new film starts centered. Clamped so edges never show.
-      var drift = -(sy - b.top) * PARALLAX;
+    if (!reduce && run.film !== "none"){
+      var drift = -(sy - run.top) * PARALLAX;
       var max = CLAMP_VH/100*vh;
-      if (drift < -max) drift = -max;
-      if (drift > max) drift = max;
+      if (drift < -max) drift = -max; if (drift > max) drift = max;
       var v = videos[run.film];
       if (v) v.style.transform = "translate3d(-50%,calc(-50% + " + drift + "px),0)";
     }
-
-    var maxScroll = document.documentElement.scrollHeight - vh;
-    bar.style.width = (maxScroll>0 ? (sy/maxScroll*100) : 0) + "%";
-    mark.classList.toggle("show", sy > vh*0.6);
+    // is a hero section under the viewport centre? (wordmark hides there)
+    var onHero = false;
+    for (var j=0;j<SB.length;j++){ var s=SB[j]; if (center>=s.top && center<s.top+s.h){ onHero = s.sec==="hero"; break; } }
+    updateRoll();
+    bar.style.width = (H>0 ? ((((sy%H)+H)%H)/H*100) : 0) + "%";
+    mark.classList.toggle("show", !onHero);
     ticking = false;
   }
 
+  // ---- Nav: jump to the nearest instance of a section (either copy) ----
+  function gotoTarget(name){
+    var targets = Array.prototype.slice.call(document.querySelectorAll('[data-sec="'+name+'"]'));
+    if (!targets.length) return;
+    var cur = window.pageYOffset, best = targets[0], bestD = Infinity;
+    targets.forEach(function(el){                        // physically nearest copy
+      var d = Math.abs(el.offsetTop - cur);
+      if (d < bestD){ bestD = d; best = el; }
+    });
+    navLock = 1;                                         // pause the loop teleport during the scroll
+    window.scrollTo({ top: best.offsetTop, behavior:"smooth" });
+    setTimeout(function(){ navLock = 0; sy = window.pageYOffset; wrap(); }, 1500);
+  }
+  document.querySelectorAll("[data-target]").forEach(function(a){
+    a.addEventListener("click", function(e){ e.preventDefault(); gotoTarget(a.getAttribute("data-target")); });
+  });
+  document.querySelectorAll("[data-soon]").forEach(function(a){
+    a.addEventListener("click", function(e){ e.preventDefault(); });
+  });
+
+  // ---- Start at the very top (downward-only loop) ----
   window.addEventListener("scroll", onScroll, {passive:true});
-  window.addEventListener("resize", function(){ vh = window.innerHeight; frame(); }, {passive:true});
-  // Kick things off (autoplay the first film immediately).
-  setActiveFilm(runs[0].film);
+  window.addEventListener("resize", function(){ layout(); sy = window.pageYOffset; wrap(); frame(); }, {passive:true});
+  window.addEventListener("load", function(){ layout(); frame(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ layout(); frame(); });
+
+  layout();
+  window.scrollTo(0, 0);
+  setActiveFilm(runs[0] ? runs[0].film : "none");
   frame();
 
-  document.getElementById("toTop").addEventListener("click", function(){
-    window.scrollTo({ top:0, behavior:"smooth" });
+  // iOS may block muted autoplay until a gesture — kick the active film on first touch/click.
+  ["touchstart","click"].forEach(function(ev){
+    window.addEventListener(ev, function(){
+      if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
+    }, {once:true, passive:true});
   });
 })();
 </script>
