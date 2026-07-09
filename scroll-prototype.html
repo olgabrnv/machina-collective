@@ -253,11 +253,11 @@
 
 <!-- Background film stack: one <video> per unique film, cross-faded on scroll/hover -->
 <div id="bg">
-  <video data-film="splashdesat" src="/scroll-assets/splash-desat.mp4"  autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="ysl"         src="/scroll-assets/ysl-libre.mp4"    autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="lipstick"    src="/scroll-assets/ysl-lipstick.mp4" autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="renjun"      src="/scroll-assets/ren-jun.mp4"      autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="descent"     src="/scroll-assets/layer-zero.mp4"   autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="splashdesat" src="https://machina-collective.b-cdn.net/scroll-assets/splash-desat.mp4"  autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="ysl"         src="https://machina-collective.b-cdn.net/scroll-assets/ysl-libre.mp4"    autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="lipstick"    src="https://machina-collective.b-cdn.net/scroll-assets/ysl-lipstick.mp4" autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="renjun"      src="https://machina-collective.b-cdn.net/scroll-assets/ren-jun.mp4"      autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="descent"     src="https://machina-collective.b-cdn.net/scroll-assets/layer-zero.mp4"   autoplay muted loop playsinline preload="auto"></video>
   <!-- Collective featured films (HLS, lazy-attached when focused): Olga = ElevenLabs, Ghibli = Tommy Hilfiger -->
   <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/9e8295b9-5572-4e2e-b43b-a98b2ed8350b/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="feat_ghibli" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/fd800681-6742-4613-ac48-2e8075837d54/playlist.m3u8" muted loop playsinline preload="none"></video>
@@ -588,7 +588,7 @@
   // ---- Artist work deck (opened from the Collective) ----
   var STREAM = "https://vz-d7ddf2a7-c8e.b-cdn.net/";
   function m3u8(g){ return STREAM + g + "/playlist.m3u8"; }
-  var SUSPENDED = { src:"/scroll-assets/suspended.mp4", p:"Suspended", t:"Short Film" };  // shared Mauricio + Olga
+  var SUSPENDED = { src:"https://machina-collective.b-cdn.net/scroll-assets/suspended.mp4", p:"Suspended", t:"Short Film" };  // shared Mauricio + Olga
   var ARTISTS = {
     mauricio: { name:"Mauricio Sierra",
       bio:{ photo:"/scroll-assets/team/mauricio.png", name:"Mauricio Sierra", role:"Director. Founder + Chief Creative Officer.",
