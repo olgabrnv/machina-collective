@@ -68,7 +68,7 @@
   }
 
   /* ---------- Top navigation (persistent) ---------- */
-  #topnav{position:fixed; top:0; left:0; right:0; z-index:7; display:flex; align-items:center;
+  #topnav{position:fixed; top:0; left:0; right:0; z-index:7; display:flex; align-items:flex-start;
     justify-content:space-between; padding:var(--pad); mix-blend-mode:difference; pointer-events:none}
   #navmark{width:clamp(96px,9vw,140px); opacity:0; transition:opacity .6s var(--ease); pointer-events:auto}
   #navmark.show{opacity:1}
@@ -105,10 +105,12 @@
     text-transform:uppercase; line-height:.86;
     letter-spacing:-.01em; font-size:clamp(28px,3.9vw,60px);
     mix-blend-mode:difference; max-width:26ch;
+    text-wrap:balance;
   }
   .sub{
     margin-top:2.2em; max-width:44ch; line-height:1.4; text-transform:uppercase; letter-spacing:.02em;
     font-size:clamp(14px,1.35vw,19px); color:var(--fg); mix-blend-mode:difference;
+    text-wrap:pretty;
   }
   /* Align type to the side it lives on */
   .sec.right .statement, .sec.right .sub, .sec.right .eyebrow{text-align:right; margin-left:auto}
@@ -365,7 +367,6 @@
         <div class="roll-name" data-artist-id="olga">Olga Baranova</div>
         <div class="roll-name" data-artist-id="ghibli">Ghibli Media</div>
       </div>
-      <div class="roll-hint">About</div>
     </div>
   </section>
 
@@ -433,24 +434,7 @@
   </section>
 
   <!-- 12 THE UNIT — founders (larger) on top, team (smaller) below -->
-  <section class="sec left" data-film="none">
-    <div class="wrap">
-      <div class="eyebrow reveal">[ → ] The unit</div>
-      <div class="unit unit-lead">
-        <figure class="reveal"><img src="/scroll-assets/team/mauricio.png" alt="Mauricio Sierra"><figcaption><b>Mauricio Sierra</b><span>Director. Founder + Chief Creative Officer</span></figcaption></figure>
-        <figure class="reveal" style="--i:1"><img src="/scroll-assets/team/sabine.png" alt="Sabine Mañas"><figcaption><b>Sabine Mañas</b><span>Co-Founder + Executive Producer, Ghibli Media</span></figcaption></figure>
-        <figure class="reveal" style="--i:2"><img src="/scroll-assets/team/olga.png" alt="Olga Baranova"><figcaption><b>Olga Baranova</b><span>Co-Founder + Creative Technologist</span></figcaption></figure>
-      </div>
-      <div class="unit unit-team">
-        <figure class="reveal"><img src="/scroll-assets/team/diane.png" alt="Diane Kozłowski"><figcaption><b>Diane Kozłowski</b><span>Project Manager + Post-Producer</span></figcaption></figure>
-        <figure class="reveal" style="--i:1"><img src="/scroll-assets/team/julien.png" alt="Julien Coulaud"><figcaption><b>Julien Coulaud</b><span>Senior Software Developer</span></figcaption></figure>
-        <figure class="reveal" style="--i:2"><img src="/scroll-assets/team/dester.png" alt="Dester Linares"><figcaption><b>Dester Linares</b><span>Visual Storyteller Editor</span></figcaption></figure>
-        <figure class="reveal" style="--i:3"><img src="/scroll-assets/team/santiago.png" alt="Santiago Fauchier"><figcaption><b>Santiago Fauchier</b><span>Music Composer + Sound Design</span></figcaption></figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- (Hero is cloned here by JS so scrolling past The Unit wraps seamlessly to the top.) -->
+  <!-- (Hero is cloned here by JS so scrolling past the last section wraps seamlessly to the top.) -->
 
 </main>
 
@@ -463,66 +447,24 @@
   <button class="artist-back" type="button">[ ← ] Back</button>
 </section>
 
-<!-- Contact page — sticky email left, project-inquiry questionnaire right (Netlify Forms) -->
+<!-- Contact page — sticky email left, newsletter signup right (Netlify Forms) -->
 <section id="contact" class="contact" aria-hidden="true">
   <div class="contact-inner">
     <div class="contact-left">
       <div class="contact-eyebrow">Contact</div>
       <a class="contact-email" href="mailto:sabine@ghiblimedia.com">sabine@ghiblimedia.com</a>
     </div>
-    <form class="cform" name="project-inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-      <input type="hidden" name="form-name" value="project-inquiry">
+    <form class="cform" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="newsletter">
       <p hidden><label>Leave blank: <input name="bot-field"></label></p>
-      <h2>Let's Connect</h2>
+      <h2>Updates</h2>
 
       <div class="cstep">
-        <div class="crow">
-          <div class="cfield"><label>First name</label><input name="first-name" placeholder="Enter your first name"></div>
-          <div class="cfield"><label>Last name</label><input name="last-name" placeholder="Enter your last name"></div>
-        </div>
-        <div class="cfield"><label>Email</label><input type="email" name="email" placeholder="Enter your email"></div>
-        <div class="cfield"><label>Brand / Company</label><input name="company" placeholder="Company or brand name"></div>
-        <div class="cfield"><label>Company Website</label><input name="website" placeholder="https://…"></div>
+        <div class="cfield"><label>Receive email updates on our news</label>
+          <input type="email" name="email" placeholder="Enter your email"></div>
       </div>
 
-      <div class="cstep">
-        <div class="cfield"><label>Select a project type</label>
-          <div class="chips">
-            <input type="radio" id="pt1" name="project-type" value="Campaign Production"><label for="pt1">Campaign Production</label>
-            <input type="radio" id="pt2" name="project-type" value="AI Production System"><label for="pt2">AI Production System</label>
-            <input type="radio" id="pt3" name="project-type" value="Content at Scale"><label for="pt3">Content at Scale</label>
-            <input type="radio" id="pt4" name="project-type" value="Training or Workshop"><label for="pt4">Training or Workshop</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="cstep">
-        <div class="cfield"><label>Tell us about your idea</label>
-          <textarea name="project-details" placeholder="Enter project details…"></textarea></div>
-      </div>
-
-      <div class="cstep">
-        <div class="cfield"><label>Budget in USD</label>
-          <div class="chips">
-            <input type="radio" id="b1" name="budget" value="$10K–25K"><label for="b1">$10K–25K</label>
-            <input type="radio" id="b2" name="budget" value="$25K–50K"><label for="b2">$25K–50K</label>
-            <input type="radio" id="b3" name="budget" value="$50K–100K"><label for="b3">$50K–100K</label>
-            <input type="radio" id="b4" name="budget" value="$100K–250K"><label for="b4">$100K–250K</label>
-            <input type="radio" id="b5" name="budget" value="$250K+"><label for="b5">$250K+</label>
-          </div>
-        </div>
-        <div class="cfield"><label>Timeline</label>
-          <div class="chips">
-            <input type="radio" id="t1" name="timeline" value="Immediate"><label for="t1">Immediate</label>
-            <input type="radio" id="t2" name="timeline" value="1–2 months"><label for="t2">1–2 months</label>
-            <input type="radio" id="t3" name="timeline" value="3–6 months"><label for="t3">3–6 months</label>
-            <input type="radio" id="t4" name="timeline" value="6+ months"><label for="t4">6+ months</label>
-            <input type="radio" id="t5" name="timeline" value="Flexible"><label for="t5">Flexible</label>
-          </div>
-        </div>
-      </div>
-
-      <button class="csubmit" type="submit">Submit Project</button>
+      <button class="csubmit" type="submit">Sign up</button>
       <div class="cnote"></div>
     </form>
   </div>
@@ -724,28 +666,28 @@
   });
   contact.querySelector(".contact-back").addEventListener("click", closeContact);
 
-  // AJAX submit to Netlify Forms (keeps the overlay; emails all answers to Sabine + Mauricio server-side)
+  // AJAX submit to Netlify Forms (newsletter signup — captured server-side)
   var cform = contact.querySelector(".cform");
   var cnote = contact.querySelector(".cnote");
   var csubmit = contact.querySelector(".csubmit");
   cform.addEventListener("submit", function(e){
     e.preventDefault();
     cnote.className = "cnote"; cnote.textContent = "";
-    csubmit.disabled = true; csubmit.textContent = "Sending…";
+    csubmit.disabled = true; csubmit.textContent = "Signing up…";
     fetch("/", { method:"POST", headers:{ "Content-Type":"application/x-www-form-urlencoded" },
       body:new URLSearchParams(new FormData(cform)).toString() })
       .then(function(r){
         if (!r.ok) throw new Error("bad response");
-        cform.reset(); if (fileName) fileName.textContent = "";
-        csubmit.textContent = "Sent ✓";
-        cnote.textContent = "Thank you — your project brief is on its way. We'll be in touch shortly.";
+        cform.reset();
+        csubmit.textContent = "Signed up ✓";
+        cnote.textContent = "Thank you — you're on the list. We'll keep you posted.";
       })
       .catch(function(){
-        csubmit.disabled = false; csubmit.textContent = "Submit Project";
+        csubmit.disabled = false; csubmit.textContent = "Sign up";
         var localPreview = /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
         cnote.className = localPreview ? "cnote" : "cnote err";
         cnote.textContent = localPreview
-          ? "Note — form submission only works on the live site. You're on the local preview, so this won't send from here."
+          ? "Note — signup only works on the live site. You're on the local preview, so this won't send from here."
           : "Something went wrong. Please email us directly at sabine@ghiblimedia.com.";
       });
   });
