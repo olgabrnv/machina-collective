@@ -513,11 +513,21 @@
   document.querySelectorAll(".reveal").forEach(function(n){ io.observe(n); });
 
   // ---- HLS helpers (shared by background films + artist decks) ----
-  function attachHls(video, url){
+  function attachHls(video, url, maxQuality){
     if (window.Hls && window.Hls.isSupported()){
-      var h = new window.Hls({ enableWorker:true, maxBufferLength:20 });
+      // Bias ABR toward higher renditions: never cap to the element's pixel size,
+      // and assume a healthy connection up front so it doesn't open on the lowest
+      // rung. maxQuality (used by the click-to-watch player) pins the top rendition.
+      var h = new window.Hls({ enableWorker:true, maxBufferLength:30,
+        capLevelToPlayerSize:false, abrEwmaDefaultEstimate:5000000, startLevel:-1 });
       h.loadSource(url); h.attachMedia(video); video._hls = h;
-    } else { video.src = url; }   // Safari plays HLS natively
+      if (maxQuality){
+        h.on(window.Hls.Events.MANIFEST_PARSED, function(){
+          var top = h.levels.length - 1;
+          h.startLevel = top; h.currentLevel = top;   // force the highest rendition
+        });
+      }
+    } else { video.src = url; }   // Safari plays HLS natively (iOS picks the level)
   }
   function detachHls(video){
     if (video._hls){ try{ video._hls.destroy(); }catch(e){} video._hls = null; }
@@ -852,7 +862,7 @@
     var mimg = document.createElement("img"); mimg.src = "/machina2/img/machina-logo-solid.png"; mimg.alt = "MACHINA"; mark.appendChild(mimg);
     var video = document.createElement("video"); video.setAttribute("playsinline",""); video.playsInline = true;
     if (contain) video.style.objectFit = "contain";
-    if (isHls) attachHls(video, url); else video.src = url;
+    if (isHls) attachHls(video, url, true); else video.src = url;   // player = highest rendition
     var playBtn = document.createElement("button"); playBtn.className = "vp-btn"; playBtn.innerHTML = ICON.pause;
     var volBtn = document.createElement("button"); volBtn.className = "vp-btn vp-vol"; volBtn.innerHTML = ICON.vol;
     var closeBtn = document.createElement("button"); closeBtn.className = "vp-btn vplayer-x"; closeBtn.setAttribute("aria-label","Close"); closeBtn.innerHTML = ICON.close;
