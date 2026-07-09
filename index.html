@@ -717,11 +717,27 @@
   setActiveFilm(runs[0] ? runs[0].film : "none");
   frame();
 
-  // iOS may block muted autoplay until a gesture — kick the active film on first touch/click.
+  // iOS blocks programmatic play() for any <video> that was never started inside a
+  // user gesture — so only the film that autoplays on load ends up playable, and the
+  // rest stay black when setActiveFilm() tries to play them on scroll. On the first
+  // touch/click we "prime" (unlock) EVERY background film: attach the lazy HLS ones,
+  // call play(), then immediately pause the inactive ones. After this one gesture,
+  // later play() calls succeed for all of them.
+  var videosPrimed = false;
+  function primeAllFilms(){
+    if (videosPrimed) return; videosPrimed = true;
+    Object.keys(videos).forEach(function(k){
+      var v = videos[k];
+      if (v.dataset.hls && !v._hls && !v.src) attachHls(v, v.dataset.hls);
+      var pr = v.play();
+      if (pr && pr.then) pr.then(function(){ if (k !== activeFilm){ try{ v.pause(); }catch(e){} } })
+                           .catch(function(){});
+      else if (k !== activeFilm){ try{ v.pause(); }catch(e){} }
+    });
+    if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
+  }
   ["touchstart","click"].forEach(function(ev){
-    window.addEventListener(ev, function(){
-      if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
-    }, {once:true, passive:true});
+    window.addEventListener(ev, primeAllFilms, {once:true, passive:true});
   });
 
   // ---- Artist work deck (opened from the Collective) ----
@@ -832,7 +848,15 @@
         } else { try{ v.pause(); }catch(err){} }
       });
     }, { threshold:0.25 });
-    oWorks.querySelectorAll("video").forEach(function(v){ workIO.observe(v); });
+    // openArtist runs inside the tap that opened the deck, so this play()/pause()
+    // pass is still a user gesture — it unlocks each film for iOS so the observer
+    // above can actually play the in-view one (otherwise decks stay black on iPhone).
+    oWorks.querySelectorAll("video").forEach(function(v){
+      workIO.observe(v);
+      if (!v._hls && !v.src){ if (v.dataset.hls==="1") attachHls(v, v.dataset.src); else v.src = v.dataset.src; }
+      var pr = v.play();
+      if (pr && pr.then) pr.then(function(){ v.pause(); }).catch(function(){});
+    });
   }
 
   function closeArtist(){
