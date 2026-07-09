@@ -178,6 +178,19 @@
   /* Title + type both in the small label font: title white, type grey */
   .work-cap .p{font-size:clamp(11px,1.1vw,14px); letter-spacing:.16em; text-transform:uppercase; color:var(--fg)}
   .work-cap .t{font-size:clamp(11px,1.1vw,14px); letter-spacing:.16em; text-transform:uppercase; color:var(--fg-dim)}
+  /* Artist bio — end of the deck, right-aligned (photo over name/role/desc/links) */
+  .artist-bio{max-width:540px; margin:clamp(48px,9vh,120px) var(--pad) clamp(20px,4vh,60px) auto; text-align:right}
+  .bio-photo{width:clamp(240px,26vw,380px); aspect-ratio:1/1; object-fit:cover; filter:grayscale(1) contrast(1.03);
+    display:block; margin-left:auto}
+  .bio-name{margin-top:1.5em; font-weight:700; text-transform:uppercase; letter-spacing:.03em; font-size:clamp(13px,1.15vw,17px)}
+  .bio-role{margin-top:.45em; color:var(--fg-dim); font-size:clamp(12px,1vw,15px)}
+  .bio-desc{margin-top:1.7em; color:var(--fg-dim); text-transform:uppercase; letter-spacing:.04em;
+    line-height:1.55; font-size:clamp(11px,.95vw,13px); max-width:46ch; margin-left:auto}
+  .bio-desc p+p{margin-top:1em}
+  .bio-links{margin-top:1.8em; display:flex; gap:1.8em; justify-content:flex-end}
+  .bio-links a{color:var(--fg); font-size:clamp(11px,1vw,13px); letter-spacing:.16em; text-transform:uppercase;
+    text-decoration:none; border-bottom:1px solid var(--rule); padding-bottom:3px; transition:border-color .3s var(--ease)}
+  .bio-links a:hover{border-color:var(--fg)}
   /* Artist name — small label font, centred at the bottom */
   .artist-name-c{position:absolute; left:0; right:0; bottom:var(--pad); z-index:2; text-align:center;
     font-size:clamp(11px,1.1vw,14px); letter-spacing:.24em; text-transform:uppercase; mix-blend-mode:difference}
@@ -286,7 +299,7 @@
         <div class="roll-name" data-artist-id="olga">Olga Baranova</div>
         <div class="roll-name" data-artist-id="ghibli">Ghibli Media</div>
       </div>
-      <div class="roll-hint">Scroll to roll</div>
+      <div class="roll-hint">About</div>
     </div>
   </section>
 
@@ -577,7 +590,13 @@
   function m3u8(g){ return STREAM + g + "/playlist.m3u8"; }
   var SUSPENDED = { src:"/scroll-assets/suspended.mp4", p:"Suspended", t:"Short Film" };  // shared Mauricio + Olga
   var ARTISTS = {
-    mauricio: { name:"Mauricio Sierra", works:[
+    mauricio: { name:"Mauricio Sierra",
+      bio:{ photo:"/scroll-assets/team/mauricio.png", name:"Mauricio Sierra", role:"Director. Founder + Chief Creative Officer.",
+        desc:[
+          "Paris-based director and photographer working across luxury, fashion, and beauty. His foundation is traditional: light, composition, narrative, taste.",
+          "MACHINA is the studio he built to carry that craft into a new era, combining film, photography, and AI-native production into a single creative system. The work is built to scale without losing the eye that made it."
+        ], site:{ label:"mausierra.com", url:"https://www.mausierra.com" }, ig:"https://www.instagram.com/mauricio_sierra_/" },
+      works:[
       {g:"df2f3bca-1321-4ffb-a1ab-b3527f69d5a1", p:"Nothing Special", t:"Short Film"},
       SUSPENDED,
       {g:"0b28f942-c81c-448e-98d3-ef8494859606", p:"Layer Zero: The Descent", t:"Short Film"},
@@ -585,13 +604,24 @@
       {g:"12b7da7b-3957-448c-a8d8-0f617c8f3989", p:"Valentino Beauty", t:"Advertorial", fit:"contain"},
       {g:"b54a6565-a184-4207-85af-931d86c25ed6", p:"Love Me Not", t:"Editorial"}
     ]},
-    olga: { name:"Olga Baranova", works:[
+    olga: { name:"Olga Baranova",
+      bio:{ photo:"/scroll-assets/team/olga.png", name:"Olga Baranova", role:"Co-Founder + Creative Technologist",
+        desc:[
+          "Olga Baranova is a creative technologist and filmmaker based in Paris. She worked extensively in high fashion, across artist management and casting, before moving fully into AI-assisted film and commercial production for clients like Qatar Airways, Google, David Beckham's IM8, Samsung, L'Oréal, and Wander, among others. In 2026, she was selected as one of the ten artists globally to take part in Google Flow Sessions.",
+          "She is a creative partner to Google, Flora, and ElevenLabs."
+        ], site:{ label:"olgabrnv.com", url:"https://olgabrnv.com" }, ig:"https://www.instagram.com/olgabrnv/" },
+      works:[
       {g:"b4399721-d815-4119-a87a-e8bef1592cfc", p:"Fanal — Google Flow Sessions", t:"Short Film"},
       SUSPENDED,
       {g:"3e4cae54-b00c-4217-9100-2d6367d05e23", p:"Luna View", t:"Short Film"},
       {g:"9e8295b9-5572-4e2e-b43b-a98b2ed8350b", p:"ElevenLabs Studio", t:"Brand Partnership"}
     ]},
-    ghibli: { name:"Ghibli Media", works:[
+    ghibli: { name:"Ghibli Media",
+      bio:{ photo:"/scroll-assets/team/sabine.png", name:"Sabine Mañas", role:"Co-Founder + Executive Producer, Ghibli Media",
+        desc:[
+          "GHIBLI MEDIA is a production company headquartered in New York, with producers across several countries. Led by executive producer and production strategist Sabine Mañas, the studio specializes in high-end production across luxury, fashion, and beauty — architecting the ecosystems that carry ambitious creative work from idea to delivery. Its practice lies in translating vision into structure: aligning talent, budgets, timelines, and partners without compromising the integrity of the work. From global campaigns to hybrid productions, they keep the craft intact at every scale."
+        ], site:{ label:"ghiblimedia.com", url:"https://ghiblimedia.com" }, ig:"https://www.instagram.com/ghiblimedia/" },
+      works:[
       {g:"fd800681-6742-4613-ac48-2e8075837d54", p:"Tommy Hilfiger — Impact", t:"Commercial"},
       {g:"04bd3578-d6a9-4a27-a882-2e66d4cf96e4", p:"Zegna — Break the Mold", t:"Commercial"},
       {img:"/machina2/img/chanel-1.jpg", p:"Chanel N°5", t:"Campaign"},
@@ -631,6 +661,21 @@
       work.appendChild(media); work.appendChild(cap);
       oWorks.appendChild(work);
     });
+    // Artist bio at the end of the deck
+    if (a.bio){
+      var b = a.bio;
+      var bio = document.createElement("div"); bio.className = "artist-bio";
+      var ph = document.createElement("img"); ph.className = "bio-photo"; ph.src = b.photo; ph.alt = b.name; bio.appendChild(ph);
+      var nm = document.createElement("div"); nm.className = "bio-name"; nm.textContent = b.name; bio.appendChild(nm);
+      var rl = document.createElement("div"); rl.className = "bio-role"; rl.textContent = b.role; bio.appendChild(rl);
+      var dc = document.createElement("div"); dc.className = "bio-desc";
+      b.desc.forEach(function(par){ var pp = document.createElement("p"); pp.textContent = par; dc.appendChild(pp); });
+      bio.appendChild(dc);
+      var lk = document.createElement("div"); lk.className = "bio-links";
+      if (b.site){ var sa = document.createElement("a"); sa.href = b.site.url; sa.target = "_blank"; sa.rel = "noopener"; sa.textContent = b.site.label; lk.appendChild(sa); }
+      if (b.ig){ var ia = document.createElement("a"); ia.href = b.ig; ia.target = "_blank"; ia.rel = "noopener"; ia.textContent = "Instagram"; lk.appendChild(ia); }
+      bio.appendChild(lk); oWorks.appendChild(bio);
+    }
     overlay.classList.add("open");
     overlay.setAttribute("aria-hidden","false");
     document.body.classList.add("locked");
