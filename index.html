@@ -245,10 +245,8 @@
   .contact-left{position:sticky; top:calc(var(--pad) + 12vh); align-self:start}
   .contact-eyebrow{font-size:clamp(10px,1vw,12px); letter-spacing:.28em; text-transform:uppercase; color:var(--fg-dim)}
   .contact-email{display:inline-block; margin-top:1.1em; color:var(--fg); text-decoration:none;
-    font-size:clamp(15px,1.5vw,20px); letter-spacing:.02em; text-transform:uppercase; line-height:1.1;
-    transition:font-size .35s var(--ease), letter-spacing .35s var(--ease)}
-  .contact-email:hover{font-family:"Bebas Neue","Helvetica Neue",sans-serif; font-weight:400;
-    font-size:clamp(28px,3.4vw,52px); letter-spacing:0; text-decoration:underline; text-underline-offset:.12em}
+    font-size:clamp(15px,1.5vw,20px); letter-spacing:.02em; text-transform:uppercase; line-height:1.1}
+  .contact-email:hover{text-decoration:underline; text-underline-offset:.12em}
   /* form */
   .cform{max-width:640px}
   .cform h2{font-family:"Bebas Neue",sans-serif; font-weight:400; text-transform:uppercase; letter-spacing:.01em;
@@ -740,10 +738,10 @@
       })
       .catch(function(){
         csubmit.disabled = false; csubmit.textContent = "Submit Project";
-        cnote.className = "cnote err";
         var localPreview = /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
+        cnote.className = localPreview ? "cnote" : "cnote err";
         cnote.textContent = localPreview
-          ? "Local preview can't submit forms — this only works on the live/Netlify site. The form itself is wired correctly."
+          ? "Note — form submission only works on the live site. You're on the local preview, so this won't send from here."
           : "Something went wrong. Please email us directly at sabine@ghiblimedia.com.";
       });
   });
