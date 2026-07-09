@@ -755,7 +755,10 @@
       .catch(function(){
         csubmit.disabled = false; csubmit.textContent = "Submit Project";
         cnote.className = "cnote err";
-        cnote.textContent = "Something went wrong. Please email us directly at sabine@ghiblimedia.com.";
+        var localPreview = /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(location.hostname);
+        cnote.textContent = localPreview
+          ? "Local preview can't submit forms — this only works on the live/Netlify site. The form itself is wired correctly."
+          : "Something went wrong. Please email us directly at sabine@ghiblimedia.com.";
       });
   });
 
