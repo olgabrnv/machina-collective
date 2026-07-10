@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>MACHINA</title>
+<title>MACHINA — Paris-Born Hybrid AI Creative Collective</title>
 <meta name="description" content="MACHINA — a Paris-born hybrid AI creative collective working at the intersection of traditional craft and AI." />
+<link rel="canonical" href="https://machinacollective.com/" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=62" />
 <link rel="apple-touch-icon" href="/favicon.svg?v=62" />
 <meta property="og:type" content="website" />
@@ -20,6 +21,22 @@
 <meta name="twitter:title" content="MACHINA" />
 <meta name="twitter:description" content="A Paris-born hybrid AI creative collective working at the intersection of traditional craft and AI." />
 <meta name="twitter:image" content="https://machinacollective.com/machina2/img/og-machina.jpg?v=63" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "MACHINA",
+  "alternateName": "Machina Collective",
+  "url": "https://machinacollective.com/",
+  "logo": "https://machinacollective.com/machina2/img/machina-logo-solid.png",
+  "image": "https://machinacollective.com/machina2/img/og-machina.jpg",
+  "description": "A Paris-born hybrid AI creative collective working at the intersection of traditional craft and AI.",
+  "foundingLocation": { "@type": "Place", "name": "Paris, France" },
+  "areaServed": ["Paris", "New York", "Worldwide"],
+  "sameAs": ["https://www.instagram.com/ghiblimedia/"],
+  "parentOrganization": { "@type": "Organization", "name": "Ghibli Media", "url": "https://ghiblimedia.com" }
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
 <style>
   :root{
@@ -33,6 +50,9 @@
     src:url("/machina3/fonts/BebasNeue-Regular.ttf") format("truetype");
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  /* Visually-hidden but readable by search engines / screen readers (the hero
+     wordmark is an image, so this gives the page one real <h1>). */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   /* No global smooth scroll — the loop's teleport must be instant. Nav links
      request smooth scrolling explicitly in JS instead. */
   /* Keep the film + type in one isolated compositing context so mix-blend-mode
@@ -357,6 +377,7 @@
 
   <!-- 01 HERO — desaturated splash film -->
   <section class="sec center" id="hero" data-sec="hero" data-film="splashdesat">
+    <h1 class="sr-only">MACHINA — Paris-Born Hybrid AI Creative Collective</h1>
     <div class="hero-lockup">
       <div class="lockup-label reveal">A Ghibli Media Division</div>
       <div class="logo reveal" style="--i:1"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
@@ -507,6 +528,7 @@
     var c = sec.cloneNode(true);
     c.removeAttribute("id");
     c.setAttribute("data-clone","1");
+    var dupH1 = c.querySelector("h1"); if (dupH1) dupH1.remove();   // keep a single <h1> in the DOM
     main.appendChild(c);
   });
   var firstCloneIndex = originals.length;
