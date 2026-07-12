@@ -4,11 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>MACHINA — Paris-Born Hybrid AI Creative Collective</title>
-<meta name="description" content="MACHINA — a Paris-born hybrid AI creative collective working at the intersection of traditional craft and AI." />
+<meta name="description" content="MACHINA is a Paris-born hybrid AI creative collective for luxury image and motion — film, photography, and AI-native production, from concept to final frame." />
 <link rel="canonical" href="https://machinacollective.com/" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="theme-color" content="#000000" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=62" />
 <link rel="apple-touch-icon" href="/favicon.svg?v=62" />
+<!-- Speed up first paint of remote assets -->
+<link rel="preconnect" href="https://machina-collective.b-cdn.net" crossorigin />
+<link rel="preconnect" href="https://vz-d7ddf2a7-c8e.b-cdn.net" crossorigin />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <meta property="og:type" content="website" />
+<meta property="og:locale" content="en_US" />
 <meta property="og:url" content="https://machinacollective.com/" />
 <meta property="og:site_name" content="Machina Collective" />
 <meta property="og:title" content="MACHINA" />
@@ -29,12 +36,10 @@
   "alternateName": "Machina Collective",
   "url": "https://machinacollective.com/",
   "logo": "https://machinacollective.com/machina2/img/machina-logo-solid.png",
-  "image": "https://machinacollective.com/machina2/img/og-machina.jpg",
-  "description": "A Paris-born hybrid AI creative collective working at the intersection of traditional craft and AI.",
-  "foundingLocation": { "@type": "Place", "name": "Paris, France" },
-  "areaServed": ["Paris", "New York", "Worldwide"],
-  "sameAs": ["https://www.instagram.com/ghiblimedia/"],
-  "parentOrganization": { "@type": "Organization", "name": "Ghibli Media", "url": "https://ghiblimedia.com" }
+  "image": "https://machinacollective.com/machina2/img/og-machina.jpg?v=63",
+  "description": "MACHINA is a Paris-born hybrid AI creative collective for luxury image and motion — film, photography, and AI-native production, from concept to final frame.",
+  "foundingLocation": "Paris, France",
+  "email": "sabine@ghiblimedia.com"
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
@@ -50,14 +55,14 @@
     src:url("/machina3/fonts/BebasNeue-Regular.ttf") format("truetype");
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  /* Visually-hidden but readable by search engines / screen readers (the hero
-     wordmark is an image, so this gives the page one real <h1>). */
-  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   /* No global smooth scroll — the loop's teleport must be instant. Nav links
      request smooth scrolling explicitly in JS instead. */
   /* Keep the film + type in one isolated compositing context so mix-blend-mode
      inverts reliably (notably on iOS, where a fixed video otherwise won't blend). */
   #stage{isolation:isolate}
+  /* Screen-reader / SEO only — an h1 the design doesn't show */
+  .visually-hidden{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0 0 0 0); white-space:nowrap; border:0}
   /* Lock horizontal movement — no sideways scroll/drift on mobile.
      Use overflow-x:CLIP, not hidden: `hidden` turns html/body into a scroll
      container, which breaks the Collective's position:sticky roll (the names
@@ -398,13 +403,14 @@
 
 <!-- Background film stack: one <video> per unique film, cross-faded on scroll/hover -->
 <div id="bg">
+  <!-- Only the hero film eager-loads; the rest stream when scrolled to (saves ~90MB on first load) -->
   <video data-film="splashdesat" src="https://machina-collective.b-cdn.net/scroll-assets/splash-desat.mp4"  autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="ysl"         src="https://machina-collective.b-cdn.net/scroll-assets/ysl-libre.mp4"    autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="lipstick"    src="https://machina-collective.b-cdn.net/scroll-assets/ysl-lipstick.mp4" autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="renjun"      src="https://machina-collective.b-cdn.net/scroll-assets/ren-jun.mp4"      autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="mercedes"    src="https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4"           autoplay muted loop playsinline preload="auto"></video>
-  <!-- Collective featured films (HLS, lazy-attached when focused): Olga = ElevenLabs, Ghibli = Tommy Hilfiger -->
-  <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/9e8295b9-5572-4e2e-b43b-a98b2ed8350b/playlist.m3u8" muted loop playsinline preload="none"></video>
+  <video data-film="ysl"         src="https://machina-collective.b-cdn.net/scroll-assets/ysl-libre.mp4"    muted loop playsinline preload="none"></video>
+  <video data-film="lipstick"    src="https://machina-collective.b-cdn.net/scroll-assets/ysl-lipstick.mp4" muted loop playsinline preload="none"></video>
+  <video data-film="renjun"      src="https://machina-collective.b-cdn.net/scroll-assets/ren-jun.mp4"      muted loop playsinline preload="none"></video>
+  <video data-film="mercedes"    src="https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4"           muted loop playsinline preload="none"></video>
+  <!-- Collective featured films (HLS, lazy-attached when focused): Olga = Fanal (Google Flow Sessions), Ghibli = Tommy Hilfiger -->
+  <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/b4399721-d815-4119-a87a-e8bef1592cfc/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="feat_ghibli" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/fd800681-6742-4613-ac48-2e8075837d54/playlist.m3u8" muted loop playsinline preload="none"></video>
   <div class="tint"></div>
 </div>
@@ -425,7 +431,7 @@
 
   <!-- 01 HERO — desaturated splash film -->
   <section class="sec center" id="hero" data-sec="hero" data-film="splashdesat">
-    <h1 class="sr-only">MACHINA — Paris-Born Hybrid AI Creative Collective</h1>
+    <h1 class="visually-hidden">MACHINA — Paris-Born Hybrid AI Creative Collective for luxury image and motion</h1>
     <div class="hero-lockup">
       <div class="lockup-label reveal">A Ghibli Media Division</div>
       <div class="logo reveal" style="--i:1"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
@@ -590,7 +596,8 @@
     var c = sec.cloneNode(true);
     c.removeAttribute("id");
     c.setAttribute("data-clone","1");
-    var dupH1 = c.querySelector("h1"); if (dupH1) dupH1.remove();   // keep a single <h1> in the DOM
+    c.setAttribute("aria-hidden","true");                 // loop duplicate — hide from screen readers
+    var dupH1 = c.querySelector("h1"); if (dupH1) dupH1.remove();   // keep a single <h1> on the page
     main.appendChild(c);
   });
   var firstCloneIndex = originals.length;
