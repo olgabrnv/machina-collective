@@ -232,7 +232,7 @@
   .lab{position:fixed; inset:0; z-index:6; background:#000; overflow-y:auto; -webkit-overflow-scrolling:touch;
     opacity:0; visibility:hidden; transition:opacity .6s var(--ease), visibility .6s var(--ease)}
   .lab.open{opacity:1; visibility:visible}
-  .lab-back{position:fixed; left:var(--pad); top:calc(var(--pad) + 1.6vh); z-index:7; pointer-events:auto;
+  .lab-back{position:fixed; left:var(--pad); bottom:var(--pad); z-index:7; pointer-events:auto;
     font-size:clamp(10px,1vw,12px); letter-spacing:.24em; text-transform:uppercase; mix-blend-mode:difference;
     background:none; border:0; color:var(--fg); font-family:inherit; cursor:pointer; opacity:.85}
   .lab-back:hover{opacity:1}
@@ -247,6 +247,12 @@
     opacity:0}
   .lab-item img.in{opacity:1}
   @media (hover:hover){ .lab-item:hover img{transform:scale(1.03)} }
+  /* [ Creative Spec ] tag — bottom-left of every tile, over a soft scrim for legibility */
+  .lab-item::after{content:""; position:absolute; left:0; right:0; bottom:0; height:42%; z-index:1;
+    background:linear-gradient(transparent, rgba(0,0,0,.42)); pointer-events:none; opacity:.9}
+  .lab-tag{position:absolute; left:clamp(10px,1vw,16px); bottom:clamp(9px,.9vw,14px); z-index:2; pointer-events:none;
+    font-size:clamp(9px,.72vw,11px); letter-spacing:.2em; text-transform:uppercase; color:#fff;
+    text-shadow:0 1px 6px rgba(0,0,0,.5)}
 
   /* Fullscreen lightbox */
   .lab-view{position:fixed; inset:0; z-index:55; background:#000; display:none; align-items:center; justify-content:center}
@@ -770,6 +776,8 @@
       img.width = it.w; img.height = it.h; img.dataset.src = it.thumb;
       img.addEventListener("load", function(){ img.classList.add("in"); });
       fig.appendChild(img);
+      var tag = document.createElement("div"); tag.className = "lab-tag"; tag.textContent = "[ Creative Spec ]";
+      fig.appendChild(tag);
       fig.addEventListener("click", function(){ openView(i); });
       grid.appendChild(fig);
     });
@@ -795,7 +803,7 @@
       var it = ITEMS[cur];
       var img = new Image(); img.src = it.full; img.alt = "";
       stage.innerHTML = ""; stage.appendChild(img);
-      meta.innerHTML = it.project + "<span class='idx'>" + (cur+1) + " / " + ITEMS.length + "</span>";
+      meta.innerHTML = "[ Creative Spec ]<span class='idx'>" + it.project + " · " + (cur+1) + " / " + ITEMS.length + "</span>";
       preload(cur+1); preload(cur-1);
     }
     function openView(i){ view.classList.add("open"); view.setAttribute("aria-hidden","false"); show(i); }
