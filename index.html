@@ -376,7 +376,7 @@
   <video data-film="ysl"         src="https://machina-collective.b-cdn.net/scroll-assets/ysl-libre.mp4"    autoplay muted loop playsinline preload="auto"></video>
   <video data-film="lipstick"    src="https://machina-collective.b-cdn.net/scroll-assets/ysl-lipstick.mp4" autoplay muted loop playsinline preload="auto"></video>
   <video data-film="renjun"      src="https://machina-collective.b-cdn.net/scroll-assets/ren-jun.mp4"      autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="descent"     src="https://machina-collective.b-cdn.net/scroll-assets/layer-zero.mp4"   autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="mercedes"    src="https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4"           autoplay muted loop playsinline preload="auto"></video>
   <!-- Collective featured films (HLS, lazy-attached when focused): Olga = ElevenLabs, Ghibli = Tommy Hilfiger -->
   <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/9e8295b9-5572-4e2e-b43b-a98b2ed8350b/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="feat_ghibli" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/fd800681-6742-4613-ac48-2e8075837d54/playlist.m3u8" muted loop playsinline preload="none"></video>
@@ -410,7 +410,7 @@
   </section>
 
   <!-- 02 THE COLLECTIVE — artist work plays behind the gun-barrel roll -->
-  <section id="collective" class="collective" data-sec="collective" data-film="descent">
+  <section id="collective" class="collective" data-sec="collective" data-film="mercedes">
     <div class="roll-stage">
       <div class="eyebrow">[ → ] The collective</div>
       <div class="roll">
@@ -599,7 +599,7 @@
   var videos = {};
   document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; });
   // Collective featured film per focused member (roll order: Mauricio, Olga, Ghibli).
-  var FEATURED = ["descent","feat_olga","feat_ghibli"];
+  var FEATURED = ["mercedes","feat_olga","feat_ghibli"];
   var activeFilm = null;
   function setActiveFilm(film){
     if (film === "none") film = null;
@@ -983,6 +983,7 @@
           "MACHINA is the studio he built to carry that craft into a new era, combining film, photography, and AI-native production into a single creative system. The work is built to scale without losing the eye that made it."
         ], site:{ label:"mausierra.com", url:"https://www.mausierra.com" }, ig:"https://www.instagram.com/mauricio_sierra_/" },
       works:[
+      {src:"https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4", p:"Mercedes-Benz", t:"Commercial"},
       {g:"df2f3bca-1321-4ffb-a1ab-b3527f69d5a1", p:"Nothing Special", t:"Short Film"},
       SUSPENDED,
       {g:"0b28f942-c81c-448e-98d3-ef8494859606", p:"Layer Zero: The Descent", t:"Short Film"},
