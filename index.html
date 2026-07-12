@@ -78,6 +78,12 @@
   #navmark{width:clamp(96px,9vw,140px); opacity:0; transition:opacity .6s var(--ease); pointer-events:auto}
   #navmark.show{opacity:1}
   #navmark img{width:100%; display:block}
+  /* In the LAB the nav sits over scrolling tiles — drop mix-blend (which inverts the
+     logo over light images and makes it vanish) and keep it solid white with a soft shadow. */
+  body.lab-open #topnav{mix-blend-mode:normal}
+  body.lab-open #navmark img{filter:drop-shadow(0 1px 7px rgba(0,0,0,.55))}
+  body.lab-open .navlinks a{text-shadow:0 1px 7px rgba(0,0,0,.55)}
+  body.lab-open .lab-back{mix-blend-mode:normal; text-shadow:0 1px 7px rgba(0,0,0,.55)}
   .navlinks{display:flex; gap:clamp(18px,3vw,54px); pointer-events:auto}
   .navlinks a{color:var(--fg); text-decoration:none; font-size:clamp(10px,1vw,13px);
     letter-spacing:.18em; text-transform:uppercase; opacity:.8; transition:opacity .3s}
@@ -878,11 +884,11 @@
       if (typeof closeContact === "function") closeContact();
       loadGrid(); shuffleOrder();
       lab.classList.add("open"); lab.setAttribute("aria-hidden","false");
-      document.body.classList.add("locked"); lab.scrollTop = 0;
+      document.body.classList.add("locked"); document.body.classList.add("lab-open"); lab.scrollTop = 0;
       mark.classList.add("show");   // keep the MACHINA wordmark visible top-left
       if (activeFilm && videos[activeFilm]) { try{ videos[activeFilm].pause(); }catch(e){} }
     }
-    function hideLab(){ closeView(); lab.classList.remove("open"); lab.setAttribute("aria-hidden","true"); }
+    function hideLab(){ closeView(); lab.classList.remove("open"); lab.setAttribute("aria-hidden","true"); document.body.classList.remove("lab-open"); }
     function closeLab(){
       var wasOpen = lab.classList.contains("open");
       hideLab();
