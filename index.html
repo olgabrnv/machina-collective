@@ -763,6 +763,8 @@
     // now, so visitors who never open the LAB don't download the thumbnails, and
     // we sidestep loading=lazy not firing for an initially-hidden container.
     var gridLoaded = false;
+    var figs = [];                                   // tile element per original index
+    var order = ITEMS.map(function(_, i){ return i; });   // current arrangement (positions -> item index)
     ITEMS.forEach(function(it, i){
       var fig = document.createElement("div"); fig.className = "lab-item";
       var img = document.createElement("img");
@@ -770,12 +772,22 @@
       img.width = it.w; img.height = it.h; img.dataset.src = it.thumb;
       img.addEventListener("load", function(){ img.classList.add("in"); });
       fig.appendChild(img);
-      fig.addEventListener("click", function(){ openView(i); });
+      fig.addEventListener("click", function(){ openView(order.indexOf(i)); });
+      figs[i] = fig;
       grid.appendChild(fig);
     });
     function loadGrid(){
       if (gridLoaded) return; gridLoaded = true;
       grid.querySelectorAll("img").forEach(function(im){ im.src = im.dataset.src; });
+    }
+    // New random arrangement every time the LAB opens (Fisher–Yates), so repeat
+    // visitors don't see the same grid twice. The lightbox follows this order too.
+    function shuffleOrder(){
+      for (var i = order.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = order[i]; order[i] = order[j]; order[j] = t;
+      }
+      order.forEach(function(idx){ grid.appendChild(figs[idx]); });   // re-flow the masonry
     }
 
     // Fullscreen lightbox
@@ -789,10 +801,10 @@
     view.querySelector(".lab-next").innerHTML = ARR.r;
     view.querySelector(".lab-x").innerHTML    = ARR.x;
 
-    function preload(i){ var im = new Image(); im.src = ITEMS[(i+ITEMS.length)%ITEMS.length].full; }
-    function show(i){
-      cur = (i + ITEMS.length) % ITEMS.length;
-      var it = ITEMS[cur];
+    function preload(pos){ var im = new Image(); im.src = ITEMS[order[(pos+order.length)%order.length]].full; }
+    function show(pos){                                   // pos = position within the shuffled order
+      cur = (pos + order.length) % order.length;
+      var it = ITEMS[order[cur]];
       var img = new Image(); img.src = it.full; img.alt = "";
       stage.innerHTML = ""; stage.appendChild(img);
       meta.innerHTML = "<span>[ Creative Spec ]</span><span>" + it.project + "</span>";
@@ -814,7 +826,7 @@
     function openLab(){
       if (typeof closeArtist === "function") closeArtist();
       if (typeof closeContact === "function") closeContact();
-      loadGrid();
+      loadGrid(); shuffleOrder();
       lab.classList.add("open"); lab.setAttribute("aria-hidden","false");
       document.body.classList.add("locked"); lab.scrollTop = 0;
       mark.classList.add("show");   // keep the MACHINA wordmark visible top-left
