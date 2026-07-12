@@ -630,9 +630,19 @@
     try{ video.pause(); video.removeAttribute("src"); video.load(); }catch(e){}
   }
 
+  // Seamless loop that survives files with an edit-list/priming tail (native `loop`
+  // stalls near the end and won't restart on some of them). We restart a hair early.
+  function seamlessLoop(v){
+    v.loop = false;
+    v.addEventListener("timeupdate", function(){
+      if (v.duration && v.currentTime > v.duration - 0.18) v.currentTime = 0;
+    });
+    v.addEventListener("ended", function(){ v.currentTime = 0; var p = v.play(); if (p && p.catch) p.catch(function(){}); });
+  }
+
   // ---- Background films ----
   var videos = {};
-  document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; });
+  document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; seamlessLoop(v); });
   // Collective featured film per focused member (roll order: Mauricio, Olga, Ghibli).
   var FEATURED = ["mercedes","feat_olga","feat_ghibli"];
   var activeFilm = null;
@@ -821,11 +831,12 @@
       var media;
       if (it.type === "video"){
         media = document.createElement("video");
-        media.muted = true; media.loop = true; media.playsInline = true; media.autoplay = true; media.preload = "none";
-        media.setAttribute("muted",""); media.setAttribute("playsinline",""); media.setAttribute("loop","");
+        media.muted = true; media.playsInline = true; media.autoplay = true; media.preload = "none";
+        media.setAttribute("muted",""); media.setAttribute("playsinline","");
         media.width = it.w; media.height = it.h;
         media.dataset.poster = it.thumb; media.dataset.src = it.src;
         media.addEventListener("loadeddata", function(){ media.classList.add("in"); });
+        seamlessLoop(media);
       } else {
         media = document.createElement("img");
         media.decoding = "async"; media.alt = "";
@@ -884,8 +895,9 @@
       stage.innerHTML = "";
       if (it.type === "video"){
         var v = document.createElement("video");
-        v.src = it.src; v.loop = true; v.autoplay = true;   // no controls — seamless full-screen loop
+        v.src = it.src; v.autoplay = true;   // no controls — seamless full-screen loop
         v.playsInline = true; v.setAttribute("playsinline",""); v.poster = it.thumb;
+        seamlessLoop(v);
         stage.appendChild(v);
         v.play().catch(function(){ v.muted = true; v.play().catch(function(){}); });   // fall back to muted if the browser blocks sound
       } else {
@@ -1065,8 +1077,8 @@
       if (w.g || w.src){
         var url = w.g ? m3u8(w.g) : w.src;
         var v = document.createElement("video");
-        v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute("playsinline","");
-        v.dataset.src = url; v.dataset.hls = w.g ? "1" : "";
+        v.muted = true; v.playsInline = true; v.setAttribute("playsinline","");
+        v.dataset.src = url; v.dataset.hls = w.g ? "1" : ""; seamlessLoop(v);
         media.appendChild(v);
         media.dataset.play = url; media.dataset.hls = w.g ? "1" : "";
         media.addEventListener("click", function(){ openPlayer(media.dataset.play, media.dataset.hls==="1", w.fit==="contain"); });
