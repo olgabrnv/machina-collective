@@ -243,15 +243,11 @@
   @media (max-width:620px){ .lab-grid{columns:2 140px} }
   .lab-item{break-inside:avoid; margin:0 0 clamp(10px,1.2vw,20px); width:100%; display:block;
     background:#0a0b0f; cursor:pointer; overflow:hidden; position:relative}
-  .lab-item img{width:100%; height:auto; display:block; transition:opacity .8s var(--ease), transform .6s var(--ease);
-    opacity:0}
-  .lab-item img.in{opacity:1}
-  @media (hover:hover){ .lab-item:hover img{transform:scale(1.03)} }
-  /* Video tiles: poster still + play glyph; the film opens with sound in the lightbox */
-  .lab-play{position:absolute; inset:0; z-index:2; display:flex; align-items:center; justify-content:center; pointer-events:none}
-  .lab-play svg{width:clamp(36px,3.6vw,52px); height:auto; opacity:.82; filter:drop-shadow(0 2px 12px rgba(0,0,0,.55));
-    transition:opacity .3s var(--ease), transform .4s var(--ease)}
-  @media (hover:hover){ .lab-item.is-video:hover .lab-play svg{opacity:1; transform:scale(1.06)} }
+  .lab-item img, .lab-item video{width:100%; height:auto; display:block;
+    transition:opacity .8s var(--ease), transform .6s var(--ease); opacity:0}
+  .lab-item img.in, .lab-item video.in{opacity:1}
+  @media (hover:hover){ .lab-item:hover img, .lab-item:hover video{transform:scale(1.03)} }
+  /* Video tiles autoplay a muted loop in the grid (in-view only); click opens sound in the lightbox */
 
   /* Fullscreen lightbox */
   .lab-view{position:fixed; inset:0; z-index:55; background:#000; display:none; align-items:center; justify-content:center}
@@ -782,22 +778,42 @@
     var gridLoaded = false;
     var figs = [];                                   // tile element per original index
     var order = ITEMS.map(function(_, i){ return i; });   // current arrangement (positions -> item index)
-    var PLAYGLYPH = "<svg viewBox='0 0 60 60'><circle cx='30' cy='30' r='29' fill='none' stroke='#fff' stroke-width='1.1' opacity='.9'/><polygon points='24,19 45,30 24,41' fill='#fff'/></svg>";
     ITEMS.forEach(function(it, i){
       var fig = document.createElement("div"); fig.className = "lab-item" + (it.type === "video" ? " is-video" : "");
-      var img = document.createElement("img");
-      img.decoding = "async"; img.alt = "";
-      img.width = it.w; img.height = it.h; img.dataset.src = it.thumb;
-      img.addEventListener("load", function(){ img.classList.add("in"); });
-      fig.appendChild(img);
-      if (it.type === "video"){ var pl = document.createElement("div"); pl.className = "lab-play"; pl.innerHTML = PLAYGLYPH; fig.appendChild(pl); }
+      var media;
+      if (it.type === "video"){
+        media = document.createElement("video");
+        media.muted = true; media.loop = true; media.playsInline = true; media.autoplay = true; media.preload = "none";
+        media.setAttribute("muted",""); media.setAttribute("playsinline",""); media.setAttribute("loop","");
+        media.width = it.w; media.height = it.h;
+        media.dataset.poster = it.thumb; media.dataset.src = it.src;
+        media.addEventListener("loadeddata", function(){ media.classList.add("in"); });
+      } else {
+        media = document.createElement("img");
+        media.decoding = "async"; media.alt = "";
+        media.width = it.w; media.height = it.h; media.dataset.src = it.thumb;
+        media.addEventListener("load", function(){ media.classList.add("in"); });
+      }
+      fig.appendChild(media);
       fig.addEventListener("click", function(){ openView(order.indexOf(i)); });
       figs[i] = fig;
       grid.appendChild(fig);
     });
+    // Play each grid video only while it's in view (attach the Bunny src on first sight)
+    var vio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var v = e.target;
+        if (e.isIntersecting){ if (!v.getAttribute("src")) v.src = v.dataset.src; v.play().catch(function(){}); }
+        else { try{ v.pause(); }catch(err){} }
+      });
+    }, { rootMargin: "150px 0px", threshold: 0.1 });   // viewport root — #lab is fixed:inset:0
     function loadGrid(){
       if (gridLoaded) return; gridLoaded = true;
-      grid.querySelectorAll("img").forEach(function(im){ im.src = im.dataset.src; });
+      grid.querySelectorAll(".lab-item").forEach(function(fig){
+        var m = fig.firstElementChild;
+        if (m.tagName === "IMG"){ m.src = m.dataset.src; }
+        else { m.poster = m.dataset.poster; m.classList.add("in"); vio.observe(m); }   // poster now; film plays when in view
+      });
     }
     // New random arrangement every time the LAB opens (Fisher–Yates), so repeat
     // visitors don't see the same grid twice. The lightbox follows this order too.
