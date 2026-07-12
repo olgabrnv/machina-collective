@@ -263,10 +263,14 @@
   @media (max-width:620px){ .lab-grid{columns:2 140px} }
   .lab-item{break-inside:avoid; margin:0 0 clamp(10px,1.2vw,20px); width:100%; display:block;
     background:#0a0b0f; cursor:pointer; overflow:hidden; position:relative}
-  .lab-item img{width:100%; height:auto; display:block; transition:opacity .8s var(--ease), transform .6s var(--ease);
-    opacity:0}
-  .lab-item img.in{opacity:1}
-  @media (hover:hover){ .lab-item:hover img{transform:scale(1.03)} }
+  .lab-item img, .lab-item video{width:100%; height:auto; display:block;
+    transition:opacity .8s var(--ease), transform .6s var(--ease); opacity:0}
+  .lab-item img.in, .lab-item video.in{opacity:1}
+  @media (hover:hover){ .lab-item:hover img, .lab-item:hover video{transform:scale(1.03)} }
+  /* Video tiles autoplay a muted loop in the grid (in-view only); click opens sound in the lightbox.
+     Unify every video tile to the images' 4:5 portrait; wide films crop to fill here (full frame in fullscreen). */
+  .lab-item.is-video{aspect-ratio:4/5}
+  .lab-item.is-video img, .lab-item.is-video video{height:100%; object-fit:cover}
 
   /* Fullscreen lightbox */
   .lab-view{position:fixed; inset:0; z-index:55; background:#000; display:none; align-items:center; justify-content:center}
@@ -392,7 +396,7 @@
   <video data-film="ysl"         src="https://machina-collective.b-cdn.net/scroll-assets/ysl-libre.mp4"    autoplay muted loop playsinline preload="auto"></video>
   <video data-film="lipstick"    src="https://machina-collective.b-cdn.net/scroll-assets/ysl-lipstick.mp4" autoplay muted loop playsinline preload="auto"></video>
   <video data-film="renjun"      src="https://machina-collective.b-cdn.net/scroll-assets/ren-jun.mp4"      autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="descent"     src="https://machina-collective.b-cdn.net/scroll-assets/layer-zero.mp4"   autoplay muted loop playsinline preload="auto"></video>
+  <video data-film="mercedes"    src="https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4"           autoplay muted loop playsinline preload="auto"></video>
   <!-- Collective featured films (HLS, lazy-attached when focused): Olga = ElevenLabs, Ghibli = Tommy Hilfiger -->
   <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/9e8295b9-5572-4e2e-b43b-a98b2ed8350b/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="feat_ghibli" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/fd800681-6742-4613-ac48-2e8075837d54/playlist.m3u8" muted loop playsinline preload="none"></video>
@@ -427,7 +431,7 @@
   </section>
 
   <!-- 02 THE COLLECTIVE — artist work plays behind the gun-barrel roll -->
-  <section id="collective" class="collective" data-sec="collective" data-film="descent">
+  <section id="collective" class="collective" data-sec="collective" data-film="mercedes">
     <div class="roll-stage">
       <div class="eyebrow">[ → ] The collective</div>
       <div class="roll">
@@ -617,7 +621,7 @@
   var videos = {};
   document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; });
   // Collective featured film per focused member (roll order: Mauricio, Olga, Ghibli).
-  var FEATURED = ["descent","feat_olga","feat_ghibli"];
+  var FEATURED = ["mercedes","feat_olga","feat_ghibli"];
   var activeFilm = null;
   function setActiveFilm(film){
     if (film === "none") film = null;
@@ -768,36 +772,82 @@
     var view  = document.querySelector(".lab-view");
     var stage = view.querySelector(".lab-stage");
     var meta  = view.querySelector(".lab-meta");
-    // Curated warm<->cold order; [file, naturalW, naturalH]. Project derived from the name.
+    // Images [file, naturalW, naturalH] + Finals videos. Project derived from the name.
     var ITEMS = [
       ["01-loewe.jpg",1278,1600],["02-loewe.jpg",1278,1600],["03-merc.jpg",1197,1600],
       ["04-loewe.jpg",1278,1600],["05-loewe.jpg",1278,1600],["06-merc.jpg",1197,1600],
-      ["07-loewe.jpg",1278,1600],["08-loewe.jpg",1278,1600],["09-merc.jpg",1600,1067],
-      ["10-loewe.jpg",1278,1600],["11-merc.jpg",1197,1600],["12-loewe.jpg",1278,1600],
+      ["08-loewe.jpg",1278,1600],["11-merc.jpg",1197,1600],["12-loewe.jpg",1278,1600],
       ["13-loewe.jpg",1278,1600],["14-merc.jpg",1197,1600],["15-loewe.jpg",1278,1600],
-      ["16-merc.jpg",1197,1600],["17-merc.jpg",1197,1600]
+      ["17-merc.jpg",1197,1600]
     ].map(function(a){
-      return { thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2],
+      return { type:"image", thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2],
                project:(a[0].indexOf("loewe")>=0 ? "Loewe" : "Mercedes") };
-    });
+    }).concat([
+      // [poster-basename, Bunny filename, tileW, tileH, project]. Videos stream from the
+      // Bunny "LAB" folder (machina-collective.b-cdn.net/LAB/); posters ship in-repo.
+      ["loewe-donkey","Donkey.mp4",1284,1608,"Loewe"],
+      ["loewe-siesta","La siesta.mp4",1284,1608,"Loewe"],
+      ["merc-tubes","tubes.mp4",1440,810,"Mercedes"],
+      ["merc-car","Mercedes car.mp4",1440,810,"Mercedes"],
+      ["merc-metal","Mercedes-_1.mp4",1440,810,"Mercedes"]
+    ].map(function(a){
+      return { type:"video",
+               src:"https://machina-collective.b-cdn.net/LAB/" + encodeURIComponent(a[1]),
+               thumb:"/lab/video/"+a[0]+".jpg", full:"/lab/video/"+a[0]+".jpg",
+               w:a[2], h:a[3], project:a[4] };
+    }));
 
     // Build the masonry. Sources are attached on first open (below) rather than
     // now, so visitors who never open the LAB don't download the thumbnails, and
     // we sidestep loading=lazy not firing for an initially-hidden container.
     var gridLoaded = false;
+    var figs = [];                                   // tile element per original index
+    var order = ITEMS.map(function(_, i){ return i; });   // current arrangement (positions -> item index)
     ITEMS.forEach(function(it, i){
-      var fig = document.createElement("div"); fig.className = "lab-item";
-      var img = document.createElement("img");
-      img.decoding = "async"; img.alt = "";
-      img.width = it.w; img.height = it.h; img.dataset.src = it.thumb;
-      img.addEventListener("load", function(){ img.classList.add("in"); });
-      fig.appendChild(img);
-      fig.addEventListener("click", function(){ openView(i); });
+      var fig = document.createElement("div"); fig.className = "lab-item" + (it.type === "video" ? " is-video" : "");
+      var media;
+      if (it.type === "video"){
+        media = document.createElement("video");
+        media.muted = true; media.loop = true; media.playsInline = true; media.autoplay = true; media.preload = "none";
+        media.setAttribute("muted",""); media.setAttribute("playsinline",""); media.setAttribute("loop","");
+        media.width = it.w; media.height = it.h;
+        media.dataset.poster = it.thumb; media.dataset.src = it.src;
+        media.addEventListener("loadeddata", function(){ media.classList.add("in"); });
+      } else {
+        media = document.createElement("img");
+        media.decoding = "async"; media.alt = "";
+        media.width = it.w; media.height = it.h; media.dataset.src = it.thumb;
+        media.addEventListener("load", function(){ media.classList.add("in"); });
+      }
+      fig.appendChild(media);
+      fig.addEventListener("click", function(){ openView(order.indexOf(i)); });
+      figs[i] = fig;
       grid.appendChild(fig);
     });
+    // Play each grid video only while it's in view (attach the Bunny src on first sight)
+    var vio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var v = e.target;
+        if (e.isIntersecting){ if (!v.getAttribute("src")) v.src = v.dataset.src; v.play().catch(function(){}); }
+        else { try{ v.pause(); }catch(err){} }
+      });
+    }, { rootMargin: "150px 0px", threshold: 0.1 });   // viewport root — #lab is fixed:inset:0
     function loadGrid(){
       if (gridLoaded) return; gridLoaded = true;
-      grid.querySelectorAll("img").forEach(function(im){ im.src = im.dataset.src; });
+      grid.querySelectorAll(".lab-item").forEach(function(fig){
+        var m = fig.firstElementChild;
+        if (m.tagName === "IMG"){ m.src = m.dataset.src; }
+        else { m.poster = m.dataset.poster; m.classList.add("in"); vio.observe(m); }   // poster now; film plays when in view
+      });
+    }
+    // New random arrangement every time the LAB opens (Fisher–Yates), so repeat
+    // visitors don't see the same grid twice. The lightbox follows this order too.
+    function shuffleOrder(){
+      for (var i = order.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = order[i]; order[i] = order[j]; order[j] = t;
+      }
+      order.forEach(function(idx){ grid.appendChild(figs[idx]); });   // re-flow the masonry
     }
 
     // Fullscreen lightbox
@@ -811,12 +861,24 @@
     view.querySelector(".lab-next").innerHTML = ARR.r;
     view.querySelector(".lab-x").innerHTML    = ARR.x;
 
-    function preload(i){ var im = new Image(); im.src = ITEMS[(i+ITEMS.length)%ITEMS.length].full; }
-    function show(i){
-      cur = (i + ITEMS.length) % ITEMS.length;
-      var it = ITEMS[cur];
-      var img = new Image(); img.src = it.full; img.alt = "";
-      stage.innerHTML = ""; stage.appendChild(img);
+    function preload(pos){
+      var it = ITEMS[order[(pos+order.length)%order.length]];
+      if (it.type !== "video"){ var im = new Image(); im.src = it.full; }
+    }
+    function show(pos){                                   // pos = position within the shuffled order
+      cur = (pos + order.length) % order.length;
+      var it = ITEMS[order[cur]];
+      stage.innerHTML = "";
+      if (it.type === "video"){
+        var v = document.createElement("video");
+        v.src = it.src; v.loop = true; v.autoplay = true; v.controls = true;
+        v.playsInline = true; v.setAttribute("playsinline",""); v.poster = it.thumb;
+        stage.appendChild(v);
+        v.play().catch(function(){ v.muted = true; v.play().catch(function(){}); });   // fall back to muted if the browser blocks sound
+      } else {
+        var img = new Image(); img.src = it.full; img.alt = "";
+        stage.appendChild(img);
+      }
       meta.innerHTML = "<span>[ Creative Spec ]</span><span>" + it.project + "</span>";
       preload(cur+1); preload(cur-1);
     }
@@ -827,7 +889,10 @@
     view.querySelector(".lab-next").addEventListener("click", nextV);
     view.querySelector(".lab-prev").addEventListener("click", prevV);
     view.querySelector(".lab-x").addEventListener("click", closeView);
-    stage.addEventListener("click", nextV);   // clicking the image advances
+    stage.addEventListener("click", function(){   // clicking an image advances; a video keeps its own controls
+      var it = ITEMS[order[cur]];
+      if (!it || it.type !== "video") nextV();
+    });
     var sx = 0;
     view.addEventListener("touchstart", function(e){ sx = e.touches[0].clientX; }, {passive:true});
     view.addEventListener("touchend", function(e){ var dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40){ dx < 0 ? nextV() : prevV(); } }, {passive:true});
@@ -836,7 +901,7 @@
     function openLab(){
       if (typeof closeArtist === "function") closeArtist();
       if (typeof closeContact === "function") closeContact();
-      loadGrid();
+      loadGrid(); shuffleOrder();
       lab.classList.add("open"); lab.setAttribute("aria-hidden","false");
       document.body.classList.add("locked"); lab.scrollTop = 0;
       mark.classList.add("show");   // keep the MACHINA wordmark visible top-left
@@ -940,6 +1005,7 @@
           "MACHINA is the studio he built to carry that craft into a new era, combining film, photography, and AI-native production into a single creative system. The work is built to scale without losing the eye that made it."
         ], site:{ label:"mausierra.com", url:"https://www.mausierra.com" }, ig:"https://www.instagram.com/mauricio_sierra_/" },
       works:[
+      {src:"https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4", p:"Mercedes-Benz", t:"Commercial"},
       {g:"df2f3bca-1321-4ffb-a1ab-b3527f69d5a1", p:"Nothing Special", t:"Short Film"},
       SUSPENDED,
       {g:"0b28f942-c81c-448e-98d3-ef8494859606", p:"Layer Zero: The Descent", t:"Short Film"},
