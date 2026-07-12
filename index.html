@@ -762,12 +762,18 @@
       return { type:"image", thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2],
                project:(a[0].indexOf("loewe")>=0 ? "Loewe" : "Mercedes") };
     }).concat([
-      ["loewe-donkey",1284,1608,"Loewe"], ["loewe-siesta",1284,1608,"Loewe"],
-      ["merc-tubes",1440,810,"Mercedes"], ["merc-car",1440,810,"Mercedes"], ["merc-metal",1440,810,"Mercedes"]
+      // [poster-basename, Bunny filename, tileW, tileH, project]. Videos stream from the
+      // Bunny "LAB" folder (machina-collective.b-cdn.net/LAB/); posters ship in-repo.
+      ["loewe-donkey","Donkey.mp4",1284,1608,"Loewe"],
+      ["loewe-siesta","La siesta.mp4",1284,1608,"Loewe"],
+      ["merc-tubes","tubes.mp4",1440,810,"Mercedes"],
+      ["merc-car","Mercedes car.mp4",1440,810,"Mercedes"],
+      ["merc-metal","Mercedes-_1.mp4",1440,810,"Mercedes"]
     ].map(function(a){
-      // poster (jpg) is the grid tile + the video's poster frame; src streams on click
-      return { type:"video", src:"/lab/video/"+a[0]+".mp4", thumb:"/lab/video/"+a[0]+".jpg",
-               full:"/lab/video/"+a[0]+".jpg", w:a[1], h:a[2], project:a[3] };
+      return { type:"video",
+               src:"https://machina-collective.b-cdn.net/LAB/" + encodeURIComponent(a[1]),
+               thumb:"/lab/video/"+a[0]+".jpg", full:"/lab/video/"+a[0]+".jpg",
+               w:a[2], h:a[3], project:a[4] };
     }));
 
     // Build the masonry. Sources are attached on first open (below) rather than

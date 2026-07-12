@@ -18,5 +18,3 @@ The team/
 # Prototype source video folder (web copies live in scroll-assets/)
 Videos/
 
-# LAB gallery videos are web-optimized + committed (served by Netlify, like the LAB images)
-!lab/video/*.mp4
