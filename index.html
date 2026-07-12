@@ -247,6 +247,11 @@
     opacity:0}
   .lab-item img.in{opacity:1}
   @media (hover:hover){ .lab-item:hover img{transform:scale(1.03)} }
+  /* Video tiles: poster still + play glyph; the film opens with sound in the lightbox */
+  .lab-play{position:absolute; inset:0; z-index:2; display:flex; align-items:center; justify-content:center; pointer-events:none}
+  .lab-play svg{width:clamp(36px,3.6vw,52px); height:auto; opacity:.82; filter:drop-shadow(0 2px 12px rgba(0,0,0,.55));
+    transition:opacity .3s var(--ease), transform .4s var(--ease)}
+  @media (hover:hover){ .lab-item.is-video:hover .lab-play svg{opacity:1; transform:scale(1.06)} }
 
   /* Fullscreen lightbox */
   .lab-view{position:fixed; inset:0; z-index:55; background:#000; display:none; align-items:center; justify-content:center}
@@ -746,7 +751,7 @@
     var view  = document.querySelector(".lab-view");
     var stage = view.querySelector(".lab-stage");
     var meta  = view.querySelector(".lab-meta");
-    // Curated warm<->cold order; [file, naturalW, naturalH]. Project derived from the name.
+    // Images [file, naturalW, naturalH] + Finals videos. Project derived from the name.
     var ITEMS = [
       ["01-loewe.jpg",1278,1600],["02-loewe.jpg",1278,1600],["03-merc.jpg",1197,1600],
       ["04-loewe.jpg",1278,1600],["05-loewe.jpg",1278,1600],["06-merc.jpg",1197,1600],
@@ -755,9 +760,16 @@
       ["13-loewe.jpg",1278,1600],["14-merc.jpg",1197,1600],["15-loewe.jpg",1278,1600],
       ["16-merc.jpg",1197,1600],["17-merc.jpg",1197,1600]
     ].map(function(a){
-      return { thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2],
+      return { type:"image", thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2],
                project:(a[0].indexOf("loewe")>=0 ? "Loewe" : "Mercedes") };
-    });
+    }).concat([
+      ["loewe-donkey",1284,1608,"Loewe"], ["loewe-siesta",1284,1608,"Loewe"],
+      ["merc-tubes",1440,810,"Mercedes"], ["merc-car",1440,810,"Mercedes"], ["merc-metal",1440,810,"Mercedes"]
+    ].map(function(a){
+      // poster (jpg) is the grid tile + the video's poster frame; src streams on click
+      return { type:"video", src:"/lab/video/"+a[0]+".mp4", thumb:"/lab/video/"+a[0]+".jpg",
+               full:"/lab/video/"+a[0]+".jpg", w:a[1], h:a[2], project:a[3] };
+    }));
 
     // Build the masonry. Sources are attached on first open (below) rather than
     // now, so visitors who never open the LAB don't download the thumbnails, and
@@ -765,13 +777,15 @@
     var gridLoaded = false;
     var figs = [];                                   // tile element per original index
     var order = ITEMS.map(function(_, i){ return i; });   // current arrangement (positions -> item index)
+    var PLAYGLYPH = "<svg viewBox='0 0 60 60'><circle cx='30' cy='30' r='29' fill='none' stroke='#fff' stroke-width='1.1' opacity='.9'/><polygon points='24,19 45,30 24,41' fill='#fff'/></svg>";
     ITEMS.forEach(function(it, i){
-      var fig = document.createElement("div"); fig.className = "lab-item";
+      var fig = document.createElement("div"); fig.className = "lab-item" + (it.type === "video" ? " is-video" : "");
       var img = document.createElement("img");
       img.decoding = "async"; img.alt = "";
       img.width = it.w; img.height = it.h; img.dataset.src = it.thumb;
       img.addEventListener("load", function(){ img.classList.add("in"); });
       fig.appendChild(img);
+      if (it.type === "video"){ var pl = document.createElement("div"); pl.className = "lab-play"; pl.innerHTML = PLAYGLYPH; fig.appendChild(pl); }
       fig.addEventListener("click", function(){ openView(order.indexOf(i)); });
       figs[i] = fig;
       grid.appendChild(fig);
@@ -801,12 +815,24 @@
     view.querySelector(".lab-next").innerHTML = ARR.r;
     view.querySelector(".lab-x").innerHTML    = ARR.x;
 
-    function preload(pos){ var im = new Image(); im.src = ITEMS[order[(pos+order.length)%order.length]].full; }
+    function preload(pos){
+      var it = ITEMS[order[(pos+order.length)%order.length]];
+      if (it.type !== "video"){ var im = new Image(); im.src = it.full; }
+    }
     function show(pos){                                   // pos = position within the shuffled order
       cur = (pos + order.length) % order.length;
       var it = ITEMS[order[cur]];
-      var img = new Image(); img.src = it.full; img.alt = "";
-      stage.innerHTML = ""; stage.appendChild(img);
+      stage.innerHTML = "";
+      if (it.type === "video"){
+        var v = document.createElement("video");
+        v.src = it.src; v.loop = true; v.autoplay = true; v.controls = true;
+        v.playsInline = true; v.setAttribute("playsinline",""); v.poster = it.thumb;
+        stage.appendChild(v);
+        v.play().catch(function(){ v.muted = true; v.play().catch(function(){}); });   // fall back to muted if the browser blocks sound
+      } else {
+        var img = new Image(); img.src = it.full; img.alt = "";
+        stage.appendChild(img);
+      }
       meta.innerHTML = "<span>[ Creative Spec ]</span><span>" + it.project + "</span>";
       preload(cur+1); preload(cur-1);
     }
@@ -817,7 +843,10 @@
     view.querySelector(".lab-next").addEventListener("click", nextV);
     view.querySelector(".lab-prev").addEventListener("click", prevV);
     view.querySelector(".lab-x").addEventListener("click", closeView);
-    stage.addEventListener("click", nextV);   // clicking the image advances
+    stage.addEventListener("click", function(){   // clicking an image advances; a video keeps its own controls
+      var it = ITEMS[order[cur]];
+      if (!it || it.type !== "video") nextV();
+    });
     var sx = 0;
     view.addEventListener("touchstart", function(e){ sx = e.touches[0].clientX; }, {passive:true});
     view.addEventListener("touchend", function(e){ var dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40){ dx < 0 ? nextV() : prevV(); } }, {passive:true});
