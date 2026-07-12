@@ -871,7 +871,7 @@
       stage.innerHTML = "";
       if (it.type === "video"){
         var v = document.createElement("video");
-        v.src = it.src; v.loop = true; v.autoplay = true; v.controls = true;
+        v.src = it.src; v.loop = true; v.autoplay = true;   // no controls — seamless full-screen loop
         v.playsInline = true; v.setAttribute("playsinline",""); v.poster = it.thumb;
         stage.appendChild(v);
         v.play().catch(function(){ v.muted = true; v.play().catch(function(){}); });   // fall back to muted if the browser blocks sound
@@ -889,10 +889,7 @@
     view.querySelector(".lab-next").addEventListener("click", nextV);
     view.querySelector(".lab-prev").addEventListener("click", prevV);
     view.querySelector(".lab-x").addEventListener("click", closeView);
-    stage.addEventListener("click", function(){   // clicking an image advances; a video keeps its own controls
-      var it = ITEMS[order[cur]];
-      if (!it || it.type !== "video") nextV();
-    });
+    stage.addEventListener("click", nextV);   // tap anywhere (image or looping video) advances — seamless
     var sx = 0;
     view.addEventListener("touchstart", function(e){ sx = e.touches[0].clientX; }, {passive:true});
     view.addEventListener("touchend", function(e){ var dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40){ dx < 0 ? nextV() : prevV(); } }, {passive:true});
