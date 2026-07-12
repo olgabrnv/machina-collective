@@ -247,7 +247,10 @@
     transition:opacity .8s var(--ease), transform .6s var(--ease); opacity:0}
   .lab-item img.in, .lab-item video.in{opacity:1}
   @media (hover:hover){ .lab-item:hover img, .lab-item:hover video{transform:scale(1.03)} }
-  /* Video tiles autoplay a muted loop in the grid (in-view only); click opens sound in the lightbox */
+  /* Video tiles autoplay a muted loop in the grid (in-view only); click opens sound in the lightbox.
+     Unify every video tile to the images' 4:5 portrait; wide films crop to fill here (full frame in fullscreen). */
+  .lab-item.is-video{aspect-ratio:4/5}
+  .lab-item.is-video img, .lab-item.is-video video{height:100%; object-fit:cover}
 
   /* Fullscreen lightbox */
   .lab-view{position:fixed; inset:0; z-index:55; background:#000; display:none; align-items:center; justify-content:center}
