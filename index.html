@@ -817,6 +817,7 @@
       loadGrid();
       lab.classList.add("open"); lab.setAttribute("aria-hidden","false");
       document.body.classList.add("locked"); lab.scrollTop = 0;
+      mark.classList.add("show");   // keep the MACHINA wordmark visible top-left
       if (activeFilm && videos[activeFilm]) { try{ videos[activeFilm].pause(); }catch(e){} }
     }
     function hideLab(){ closeView(); lab.classList.remove("open"); lab.setAttribute("aria-hidden","true"); }
@@ -825,6 +826,7 @@
       hideLab();
       if (!wasOpen) return;
       document.body.classList.remove("locked");
+      frame();   // restore the wordmark's normal show/hide for the current scroll position
       if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
     }
     labClose = closeLab; labHide = hideLab;
