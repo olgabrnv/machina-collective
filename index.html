@@ -1027,7 +1027,7 @@
           "MACHINA is the studio he built to carry that craft into a new era, combining film, photography, and AI-native production into a single creative system. The work is built to scale without losing the eye that made it."
         ], site:{ label:"mausierra.com", url:"https://www.mausierra.com" }, ig:"https://www.instagram.com/mauricio_sierra_/" },
       works:[
-      {src:"https://machina-collective.b-cdn.net/LAB/Jacquemus.mp4", p:"Jacquemus", t:"Spec Ad"},
+      {src:"https://machina-collective.b-cdn.net/LAB/Jacquemus.mp4", poster:"/lab/video/Jacquemus.jpg", p:"Jacquemus", t:"Spec Ad"},
       {src:"https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4", p:"Mercedes-Benz", t:"Commercial"},
       {g:"df2f3bca-1321-4ffb-a1ab-b3527f69d5a1", p:"Nothing Special", t:"Short Film"},
       SUSPENDED,
@@ -1079,6 +1079,7 @@
         var url = w.g ? m3u8(w.g) : w.src;
         var v = document.createElement("video");
         v.muted = true; v.playsInline = true; v.setAttribute("playsinline","");
+        if (w.poster) v.poster = w.poster;   // show first frame instantly while the film streams
         v.dataset.src = url; v.dataset.hls = w.g ? "1" : ""; seamlessLoop(v);
         media.appendChild(v);
         media.dataset.play = url; media.dataset.hls = w.g ? "1" : "";
