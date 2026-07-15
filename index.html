@@ -1027,7 +1027,7 @@
           "MACHINA is the studio he built to carry that craft into a new era, combining film, photography, and AI-native production into a single creative system. The work is built to scale without losing the eye that made it."
         ], site:{ label:"mausierra.com", url:"https://www.mausierra.com" }, ig:"https://www.instagram.com/mauricio_sierra_/" },
       works:[
-      {src:"https://machina-collective.b-cdn.net/LAB/Jacquemus.mp4", p:"Jacquemus", t:"Spec Ad"},
+      {src:"https://machina-collective.b-cdn.net/LAB/Jacquemus.mp4", poster:"/lab/video/Jacquemus.jpg", p:"Jacquemus", t:"Spec Ad"},
       {src:"https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4", p:"Mercedes-Benz", t:"Commercial"},
       {g:"df2f3bca-1321-4ffb-a1ab-b3527f69d5a1", p:"Nothing Special", t:"Short Film"},
       SUSPENDED,
@@ -1079,6 +1079,7 @@
         var url = w.g ? m3u8(w.g) : w.src;
         var v = document.createElement("video");
         v.muted = true; v.playsInline = true; v.setAttribute("playsinline","");
+        if (w.poster) v.poster = w.poster;   // show first frame instantly while the film streams
         v.dataset.src = url; v.dataset.hls = w.g ? "1" : ""; seamlessLoop(v);
         media.appendChild(v);
         media.dataset.play = url; media.dataset.hls = w.g ? "1" : "";
@@ -1125,15 +1126,17 @@
         } else { try{ v.pause(); }catch(err){} }
       });
     }, { threshold:0.25 });
-    // openArtist runs inside the tap that opened the deck, so this play()/pause()
-    // pass is still a user gesture — it unlocks each film for iOS so the observer
-    // above can actually play the in-view one (otherwise decks stay black on iPhone).
-    oWorks.querySelectorAll("video").forEach(function(v){
-      workIO.observe(v);
-      if (!v._hls && !v.src){ if (v.dataset.hls==="1") attachHls(v, v.dataset.src); else v.src = v.dataset.src; }
-      var pr = v.play();
-      if (pr && pr.then) pr.then(function(){ v.pause(); }).catch(function(){});
-    });
+    // Only the FIRST (visible) film loads on open — attached + played in this tap
+    // gesture so it starts instantly (and is iOS-unlocked). The rest are just
+    // observed and lazy-load when scrolled into view, so they don't steal bandwidth
+    // from the visible one (the old "prime every film" pass made the top film crawl).
+    var deckVids = oWorks.querySelectorAll("video");
+    deckVids.forEach(function(v){ workIO.observe(v); });
+    var firstV = deckVids[0];
+    if (firstV){
+      if (!firstV._hls && !firstV.src){ if (firstV.dataset.hls==="1") attachHls(firstV, firstV.dataset.src); else firstV.src = firstV.dataset.src; }
+      firstV.play().catch(function(){});
+    }
   }
 
   function closeArtist(){
