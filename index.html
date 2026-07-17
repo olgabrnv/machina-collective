@@ -576,6 +576,7 @@
   // ---- Tunables -----------------------------------------------------------
   var PARALLAX = 0.28;   // BG speed vs scroll. Higher = faster BG motion.
   var CLAMP_VH = 26;     // max BG drift each way, in vh (keeps film edges hidden)
+  var PRIME_MS = 700;    // max time an off-screen film may stream while being unlocked (see primeAllFilms)
   // -------------------------------------------------------------------------
 
   var reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -642,7 +643,10 @@
 
   // ---- Background films ----
   var videos = {};
-  document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; seamlessLoop(v); });
+  document.querySelectorAll("#bg video").forEach(function(v){
+    videos[v.dataset.film] = v; seamlessLoop(v);
+    if (v.preload === "auto") v.dataset.warmed = "1";   // hero already loads eagerly
+  });
   // Collective featured film per focused member (roll order: Mauricio, Olga, Ghibli).
   var FEATURED = ["mercedes","feat_olga","feat_ghibli"];
   var activeFilm = null;
@@ -654,9 +658,25 @@
       var v = videos[k];
       if (k === film){
         if (v.dataset.hls && !v._hls && !v.src) attachHls(v, v.dataset.hls);   // lazy HLS
+        v.dataset.warmed = "1";                                                // it's live — never load() it out from under itself
         v.classList.add("active"); v.style.transform="translate3d(-50%,-50%,0)"; v.play().catch(function(){});
       } else { v.classList.remove("active"); try{ v.pause(); }catch(e){} }
     }
+  }
+
+  // With the non-hero films at preload="none", a film otherwise only starts
+  // loading once it's already on screen — so it cross-fades in black. Start the
+  // next one buffering while the current is still showing. Once per film: load()
+  // restarts resource selection (that's what makes the promoted preload actually
+  // fetch), and re-running it on a live film would reset it mid-play.
+  function warmFilm(film){
+    if (!film || film === "none") return;
+    var v = videos[film];
+    if (!v || v.dataset.warmed) return;
+    v.dataset.warmed = "1";
+    if (v.dataset.hls){ if (!v._hls && !v.src) attachHls(v, v.dataset.hls); return; }
+    v.preload = "auto";
+    try{ v.load(); }catch(e){}
   }
 
   // ---- Cached layout: section bounds, film runs, loop length (H) ----
@@ -714,10 +734,10 @@
   function frame(){
     var center = sy + vh/2;
     // run holding the viewport centre (default film)
-    var run = runs[0];
+    var run = runs[0], ri = 0;
     for (var i=0;i<runs.length;i++){
-      if (center >= runs[i].top && center < runs[i].bottom){ run = runs[i]; break; }
-      if (i === runs.length-1) run = runs[i];
+      if (center >= runs[i].top && center < runs[i].bottom){ run = runs[i]; ri = i; break; }
+      if (i === runs.length-1){ run = runs[i]; ri = i; }
     }
     // centered section: hero hides the wordmark; a collective makes the film follow the focused member
     var onHero = false, coll = null;
@@ -732,6 +752,9 @@
       anchor = coll.top;
     }
     setActiveFilm(film);
+    // Get the next film ready while the current one is still on screen.
+    if (runs[ri+1]) warmFilm(runs[ri+1].film);
+    if (coll) warmFilm(FEATURED[fi+1]);
     if (!reduce && film !== "none"){
       var drift = -(sy - anchor) * PARALLAX;
       var max = CLAMP_VH/100*vh;
@@ -1004,10 +1027,21 @@
     Object.keys(videos).forEach(function(k){
       var v = videos[k];
       if (v.dataset.hls && !v._hls && !v.src) attachHls(v, v.dataset.hls);
+      // play() has to fire synchronously inside this gesture — that call is what
+      // grants the element playback. But releasing it only when the play promise
+      // settles is a trap on mobile: the promise waits for playback to actually
+      // START, so every off-screen film keeps streaming until it does — and the
+      // slower the connection, the longer they all hog it, starving the one film
+      // that's on screen. The grant is made the moment play() is called, so cap
+      // how long they may run; warmFilm/setActiveFilm load them again when due.
+      var released = false;
+      function release(){
+        if (released) return; released = true;
+        if (k !== activeFilm){ try{ v.pause(); }catch(e){} }
+      }
       var pr = v.play();
-      if (pr && pr.then) pr.then(function(){ if (k !== activeFilm){ try{ v.pause(); }catch(e){} } })
-                           .catch(function(){});
-      else if (k !== activeFilm){ try{ v.pause(); }catch(e){} }
+      if (pr && pr.then) pr.then(release, release); else release();
+      setTimeout(release, PRIME_MS);
     });
     if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
   }
