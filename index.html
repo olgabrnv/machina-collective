@@ -403,12 +403,15 @@
 
 <!-- Background film stack: one <video> per unique film, cross-faded on scroll/hover -->
 <div id="bg">
-  <!-- Only the hero film eager-loads; the rest stream when scrolled to (saves ~90MB on first load) -->
-  <video data-film="splashdesat" src="https://machina-collective.b-cdn.net/scroll-assets/splash-desat.mp4"  autoplay muted loop playsinline preload="auto"></video>
-  <video data-film="ysl"         src="https://machina-collective.b-cdn.net/scroll-assets/ysl-libre.mp4"    muted loop playsinline preload="none"></video>
-  <video data-film="lipstick"    src="https://machina-collective.b-cdn.net/scroll-assets/ysl-lipstick.mp4" muted loop playsinline preload="none"></video>
-  <video data-film="farniente"   src="https://machina-collective.b-cdn.net/scroll-assets/Far_Niente.mp4"            muted loop playsinline preload="none"></video>
-  <video data-film="mercedes"    src="https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4"           muted loop playsinline preload="none"></video>
+  <!-- All background films stream from Bunny Stream as adaptive HLS (240p–1080p),
+       so a phone pulls a ~0.3–0.8Mbps rendition instead of the same fixed 1080p
+       9–15Mbps file a desktop gets. Attached lazily: setActiveFilm when a film
+       goes live, warmFilm one section ahead. -->
+  <video data-film="splashdesat" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/41a59880-1b42-428f-80f4-4efae0c56450/playlist.m3u8" muted loop playsinline preload="none"></video>
+  <video data-film="ysl"         data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/3a1076bd-e35c-4881-885d-11c8b3a962c3/playlist.m3u8" muted loop playsinline preload="none"></video>
+  <video data-film="lipstick"    data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/e3160fdb-9322-4218-b2ea-fec87bf5edf7/playlist.m3u8" muted loop playsinline preload="none"></video>
+  <video data-film="renjun"      data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/d3c92ce0-5814-4aed-afdc-e929dbc62d5b/playlist.m3u8" muted loop playsinline preload="none"></video>
+  <video data-film="mercedes"    data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/2773da03-0944-438b-a8b0-8acb809178c8/playlist.m3u8" muted loop playsinline preload="none"></video>
   <!-- Collective featured films (HLS, lazy-attached when focused): Olga = Fanal (Google Flow Sessions), Ghibli = Tommy Hilfiger -->
   <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/b4399721-d815-4119-a87a-e8bef1592cfc/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="feat_ghibli" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/fd800681-6742-4613-ac48-2e8075837d54/playlist.m3u8" muted loop playsinline preload="none"></video>
@@ -479,7 +482,7 @@
   </section>
 
   <!-- 08 WHY — ren & jun rotation film behind statement + second paragraph -->
-  <section class="sec left" data-film="farniente">
+  <section class="sec left" data-film="renjun">
     <div class="wrap" style="max-width:1100px">
       <div class="eyebrow reveal">[ → ] Why we do it</div>
       <h2 class="statement reveal" style="--i:1">Craft is the only difference left when anyone can generate anything.</h2>
@@ -576,6 +579,7 @@
   // ---- Tunables -----------------------------------------------------------
   var PARALLAX = 0.28;   // BG speed vs scroll. Higher = faster BG motion.
   var CLAMP_VH = 26;     // max BG drift each way, in vh (keeps film edges hidden)
+  var PRIME_MS = 700;    // max time an off-screen film may stream while being unlocked (see primeAllFilms)
   // -------------------------------------------------------------------------
 
   var reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -642,7 +646,10 @@
 
   // ---- Background films ----
   var videos = {};
-  document.querySelectorAll("#bg video").forEach(function(v){ videos[v.dataset.film] = v; seamlessLoop(v); });
+  document.querySelectorAll("#bg video").forEach(function(v){
+    videos[v.dataset.film] = v; seamlessLoop(v);
+    if (v.preload === "auto") v.dataset.warmed = "1";   // eager-loading films need no warming
+  });
   // Collective featured film per focused member (roll order: Mauricio, Olga, Ghibli).
   var FEATURED = ["mercedes","feat_olga","feat_ghibli"];
   var activeFilm = null;
@@ -654,9 +661,25 @@
       var v = videos[k];
       if (k === film){
         if (v.dataset.hls && !v._hls && !v.src) attachHls(v, v.dataset.hls);   // lazy HLS
+        v.dataset.warmed = "1";                                                // it's live — never load() it out from under itself
         v.classList.add("active"); v.style.transform="translate3d(-50%,-50%,0)"; v.play().catch(function(){});
       } else { v.classList.remove("active"); try{ v.pause(); }catch(e){} }
     }
+  }
+
+  // With the non-hero films at preload="none", a film otherwise only starts
+  // loading once it's already on screen — so it cross-fades in black. Start the
+  // next one buffering while the current is still showing. Once per film: load()
+  // restarts resource selection (that's what makes the promoted preload actually
+  // fetch), and re-running it on a live film would reset it mid-play.
+  function warmFilm(film){
+    if (!film || film === "none") return;
+    var v = videos[film];
+    if (!v || v.dataset.warmed) return;
+    v.dataset.warmed = "1";
+    if (v.dataset.hls){ if (!v._hls && !v.src) attachHls(v, v.dataset.hls); return; }
+    v.preload = "auto";
+    try{ v.load(); }catch(e){}
   }
 
   // ---- Cached layout: section bounds, film runs, loop length (H) ----
@@ -714,10 +737,10 @@
   function frame(){
     var center = sy + vh/2;
     // run holding the viewport centre (default film)
-    var run = runs[0];
+    var run = runs[0], ri = 0;
     for (var i=0;i<runs.length;i++){
-      if (center >= runs[i].top && center < runs[i].bottom){ run = runs[i]; break; }
-      if (i === runs.length-1) run = runs[i];
+      if (center >= runs[i].top && center < runs[i].bottom){ run = runs[i]; ri = i; break; }
+      if (i === runs.length-1){ run = runs[i]; ri = i; }
     }
     // centered section: hero hides the wordmark; a collective makes the film follow the focused member
     var onHero = false, coll = null;
@@ -732,6 +755,9 @@
       anchor = coll.top;
     }
     setActiveFilm(film);
+    // Get the next film ready while the current one is still on screen.
+    if (runs[ri+1]) warmFilm(runs[ri+1].film);
+    if (coll) warmFilm(FEATURED[fi+1]);
     if (!reduce && film !== "none"){
       var drift = -(sy - anchor) * PARALLAX;
       var max = CLAMP_VH/100*vh;
@@ -1004,10 +1030,27 @@
     Object.keys(videos).forEach(function(k){
       var v = videos[k];
       if (v.dataset.hls && !v._hls && !v.src) attachHls(v, v.dataset.hls);
+      // play() has to fire synchronously inside this gesture — that call is what
+      // grants the element playback. But releasing it only when the play promise
+      // settles is a trap on mobile: the promise waits for playback to actually
+      // START, so every off-screen film keeps streaming until it does — and the
+      // slower the connection, the longer they all hog it, starving the one film
+      // that's on screen. The grant is made the moment play() is called, so cap
+      // how long they may run; warmFilm/setActiveFilm load them again when due.
+      var released = false;
+      function release(){
+        if (released) return; released = true;
+        if (k === activeFilm) return;
+        try{ v.pause(); }catch(e){}
+        // Pausing alone doesn't free the network here: hls.js keeps filling its
+        // buffer regardless of whether the element is playing. Detach the stream
+        // outright — the element stays unlocked for iOS, and warmFilm /
+        // setActiveFilm re-attach it when the film is actually due.
+        if (v.dataset.hls){ detachHls(v); delete v.dataset.warmed; }
+      }
       var pr = v.play();
-      if (pr && pr.then) pr.then(function(){ if (k !== activeFilm){ try{ v.pause(); }catch(e){} } })
-                           .catch(function(){});
-      else if (k !== activeFilm){ try{ v.pause(); }catch(e){} }
+      if (pr && pr.then) pr.then(release, release); else release();
+      setTimeout(release, PRIME_MS);
     });
     if (activeFilm && videos[activeFilm]) videos[activeFilm].play().catch(function(){});
   }
@@ -1044,9 +1087,10 @@
           "She is a creative partner to Google, Flora, and ElevenLabs."
         ], site:{ label:"olgabrnv.com", url:"https://olgabrnv.com" }, ig:"https://www.instagram.com/olgabrnv/" },
       works:[
+      {g:"800de5c4-d4d9-43c8-8d9f-e601a4415204", p:"Summer Boredom", t:"Personal Work"},
       {g:"b4399721-d815-4119-a87a-e8bef1592cfc", p:"Fanal — Google Flow Sessions", t:"Short Film"},
       SUSPENDED,
-      {g:"3e4cae54-b00c-4217-9100-2d6367d05e23", p:"Luna View", t:"Short Film"},
+      {g:"aa039d7f-bd8f-443d-8a6a-d7d870fa3f06", p:"Luna View", t:"Short Film"},
       {g:"9e8295b9-5572-4e2e-b43b-a98b2ed8350b", p:"ElevenLabs Studio", t:"Brand Partnership"}
     ]},
     ghibli: { name:"Ghibli Media",
