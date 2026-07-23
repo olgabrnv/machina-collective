@@ -822,15 +822,18 @@
     var stage = view.querySelector(".lab-stage");
     var meta  = view.querySelector(".lab-meta");
     // Images [file, naturalW, naturalH] + Finals videos. Project derived from the name.
+    // Stills are named NN-<project>.jpg; the suffix picks the label shown in fullscreen.
+    var PROJECTS = { loewe:"Loewe", merc:"Mercedes", farniente:"Far Niente" };
+
     var ITEMS = [
       ["01-loewe.jpg",1278,1600],["02-loewe.jpg",1278,1600],["03-merc.jpg",1197,1600],
       ["04-loewe.jpg",1278,1600],["05-loewe.jpg",1278,1600],["06-merc.jpg",1197,1600],
       ["08-loewe.jpg",1278,1600],["11-merc.jpg",1197,1600],["12-loewe.jpg",1278,1600],
       ["13-loewe.jpg",1278,1600],["14-merc.jpg",1197,1600],["15-loewe.jpg",1278,1600],
-      ["17-merc.jpg",1197,1600]
+      ["17-merc.jpg",1197,1600],["18-farniente.jpg",1279,1600]
     ].map(function(a){
       return { type:"image", thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2],
-               project:(a[0].indexOf("loewe")>=0 ? "Loewe" : "Mercedes") };
+               project:PROJECTS[a[0].replace(/^\d+-|\.jpg$/g, "")] };
     }).concat([
       // [poster-basename, Bunny filename, tileW, tileH, project]. Videos stream from the
       // Bunny "LAB" folder (machina-collective.b-cdn.net/LAB/); posters ship in-repo.
@@ -838,7 +841,12 @@
       ["loewe-siesta","La siesta.mp4",1284,1608,"Loewe"],
       ["merc-tubes","tubes.mp4",1440,810,"Mercedes"],
       ["merc-car","Mercedes car.mp4",1440,810,"Mercedes"],
-      ["merc-metal","Mercedes-_1.mp4",1440,810,"Mercedes"]
+      ["merc-metal","Mercedes-_1.mp4",1440,810,"Mercedes"],
+      ["far-niente-1","Far_Niente_1.mp4",1080,1350,"Far Niente"],
+      ["far-niente-2","Far_Niente_2.mp4",1080,1350,"Far Niente"],
+      ["far-niente-3","Far_Niente_3.mp4",1080,1350,"Far Niente"],
+      ["far-niente-5","Far_Niente_5.mp4",1080,1350,"Far Niente"],
+      ["far-niente-7","Far_Niente_7.mp4",1080,1350,"Far Niente"]
     ].map(function(a){
       return { type:"video",
                src:"https://machina-collective.b-cdn.net/LAB/" + encodeURIComponent(a[1]),
