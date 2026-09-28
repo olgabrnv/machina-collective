@@ -416,8 +416,8 @@
   <video data-film="splashdesat" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/41a59880-1b42-428f-80f4-4efae0c56450/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="ysl"         data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/3a1076bd-e35c-4881-885d-11c8b3a962c3/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="lipstick"    data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/e3160fdb-9322-4218-b2ea-fec87bf5edf7/playlist.m3u8" muted loop playsinline preload="none"></video>
-  <video data-film="mercedes"    data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/2773da03-0944-438b-a8b0-8acb809178c8/playlist.m3u8" muted loop playsinline preload="none"></video>
-  <!-- Collective featured films (HLS, lazy-attached when focused): Olga = Summer Boredom, Ghibli = Tommy Hilfiger -->
+  <!-- Collective featured films (lazy-attached when focused): Mauricio = Far Niente (plain MP4, not yet on Bunny Stream), Olga = Summer Boredom, Ghibli = Tommy Hilfiger -->
+  <video data-film="farniente"   src="https://machina-collective.b-cdn.net/scroll-assets/Far_Niente.mp4" muted loop playsinline preload="none"></video>
   <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/800de5c4-d4d9-43c8-8d9f-e601a4415204/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="feat_ghibli" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/fd800681-6742-4613-ac48-2e8075837d54/playlist.m3u8" muted loop playsinline preload="none"></video>
   <div class="tint"></div>
@@ -451,7 +451,7 @@
   </section>
 
   <!-- 02 THE COLLECTIVE — artist work plays behind the gun-barrel roll -->
-  <section id="collective" class="collective" data-sec="collective" data-film="mercedes">
+  <section id="collective" class="collective" data-sec="collective" data-film="farniente">
     <div class="roll-stage">
       <div class="eyebrow">[ → ] The collective</div>
       <div class="roll">
@@ -656,7 +656,7 @@
     if (v.preload === "auto") v.dataset.warmed = "1";   // eager-loading films need no warming
   });
   // Collective featured film per focused member (roll order: Mauricio, Olga, Ghibli).
-  var FEATURED = ["mercedes","feat_olga","feat_ghibli"];
+  var FEATURED = ["farniente","feat_olga","feat_ghibli"];
   var activeFilm = null;
   function setActiveFilm(film){
     if (film === "none") film = null;
