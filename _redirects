@@ -1,3 +1,7 @@
+# SITE CLOSED — every address shows a plain black page (offline.html).
+# To reopen the site, delete this comment and the rule below. Nothing else changed.
+/*    /offline.html   200!
+
 # Digital business cards — one per person at /card/<name> (e.g. /card/mauricio)
 /card        /card.html   200
 /card/*      /card.html   200
