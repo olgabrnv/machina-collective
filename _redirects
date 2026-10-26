@@ -1,6 +1,28 @@
-# HOLDING PAGE: every address shows offline.html (black, MACHINA, noindex).
-# To restore the site, delete this comment and the rule below.
-/*    /offline.html   200!
+# BLOCKED FOR NOW (Oct 2026): files that are no longer linked and must not be served
+# (Olga's files, old-site data/images, removed work). The files stay in the repo.
+/olga.vcf                                        /404   404!
+/scroll-assets/team/olga.jpg                     /404   404!
+/scroll-assets/posters/living-garden.jpg         /404   404!
+/lab/video/Jacquemus.jpg                         /404   404!
+/machina/*                                       /404   404!
+/machina2/data.js                                /404   404!
+/machina2/img/lab/*                              /404   404!
+/machina2/img/chanel-1.jpg                       /404   404!
+/machina2/img/chanel-2.jpg                       /404   404!
+/machina2/img/chanel-3.jpg                       /404   404!
+/machina2/img/cube.png                           /404   404!
+/machina2/img/eye.png                            /404   404!
+/machina2/img/hero-frame.png                     /404   404!
+/machina2/img/lips.png                           /404   404!
+/machina2/img/machina-logo.png                   /404   404!
+/machina2/img/nothing-special.jpg                /404   404!
+/machina2/img/og-preview.jpg                     /404   404!
+/machina2/img/olga-vivatech-10.png               /404   404!
+/machina2/img/olga-vivatech-21.png               /404   404!
+/machina2/img/olga-vivatech-8.png                /404   404!
+/machina2/img/portrait-olga.jpg                  /404   404!
+/machina3/app.js                                 /404   404!
+/machina3/styles.css                             /404   404!
 
 # Digital business cards — one per person at /card/<name> (e.g. /card/mauricio)
 /card        /card.html   200
