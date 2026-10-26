@@ -416,10 +416,13 @@
   <video data-film="splashdesat" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/41a59880-1b42-428f-80f4-4efae0c56450/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="ysl"         data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/3a1076bd-e35c-4881-885d-11c8b3a962c3/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="lipstick"    data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/e3160fdb-9322-4218-b2ea-fec87bf5edf7/playlist.m3u8" muted loop playsinline preload="none"></video>
-  <!-- Collective featured films (lazy-attached when focused): Mauricio = Far Niente (plain MP4, not yet on Bunny Stream), Olga = Summer Boredom, Ghibli = Tommy Hilfiger -->
-  <video data-film="farniente"   src="https://machina-collective.b-cdn.net/scroll-assets/Far_Niente.mp4" muted loop playsinline preload="none"></video>
-  <video data-film="feat_olga"   data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/800de5c4-d4d9-43c8-8d9f-e601a4415204/playlist.m3u8" muted loop playsinline preload="none"></video>
-  <video data-film="feat_ghibli" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/fd800681-6742-4613-ac48-2e8075837d54/playlist.m3u8" muted loop playsinline preload="none"></video>
+  <!-- THE COLLECTIVE section, its menu link and its films are removed for now (Oct 2026), so no
+       artist work is reachable. To restore: bring back the section + "Collective" nav link from git
+       history (commit before "Remove the Collective"), plus these films:
+       Mauricio = Far Niente  https://machina-collective.b-cdn.net/scroll-assets/Far_Niente.mp4
+       Olga     = Summer Boredom, Bunny Stream 800de5c4-d4d9-43c8-8d9f-e601a4415204
+       Ghibli   = Tommy Hilfiger, Bunny Stream fd800681-6742-4613-ac48-2e8075837d54
+       The ARTISTS decks below are kept, unreachable. -->
   <div class="tint"></div>
 </div>
 <div id="grain"></div>
@@ -427,10 +430,7 @@
 <nav id="topnav">
   <a id="navmark" href="#" data-target="hero"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></a>
   <div class="navlinks">
-    <a href="#" data-target="collective">Collective</a>
     <a href="#" data-target="whoweare">About</a>
-    <a href="#" data-lab="1">Lab</a>
-    <a href="#" data-contact="1">Contact</a>
   </div>
 </nav>
 <div id="progress"></div>
@@ -441,25 +441,12 @@
   <section class="sec center" id="hero" data-sec="hero" data-film="splashdesat">
     <h1 class="visually-hidden">MACHINA — Paris-Born Hybrid AI Creative Collective for luxury image and motion</h1>
     <div class="hero-lockup">
-      <div class="lockup-label reveal">A Ghibli Media Division</div>
       <div class="logo reveal" style="--i:1"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></div>
       <div class="lockup-label reveal" style="--i:2">Paris-Born Hybrid AI Collective</div>
     </div>
     <div class="cornermeta bl reveal" style="--i:3">Paris</div>
     <div class="cornermeta br reveal" style="--i:3">New York</div>
     <div class="scrollcue">Scroll</div>
-  </section>
-
-  <!-- 02 THE COLLECTIVE — artist work plays behind the gun-barrel roll -->
-  <section id="collective" class="collective" data-sec="collective" data-film="farniente">
-    <div class="roll-stage">
-      <div class="eyebrow">[ → ] The collective</div>
-      <div class="roll">
-        <div class="roll-name" data-artist-id="mauricio">Mauricio Sierra</div>
-        <div class="roll-name" data-artist-id="olga">Olga Baranova</div>
-        <div class="roll-name" data-artist-id="ghibli">Ghibli Media</div>
-      </div>
-    </div>
   </section>
 
   <!-- 03 WHO WE ARE — desaturated splash film behind -->
@@ -655,8 +642,8 @@
     videos[v.dataset.film] = v; seamlessLoop(v);
     if (v.preload === "auto") v.dataset.warmed = "1";   // eager-loading films need no warming
   });
-  // Collective featured film per focused member (roll order: Mauricio, Olga, Ghibli).
-  var FEATURED = ["farniente","feat_olga","feat_ghibli"];
+  // Collective featured film per focused member (roll order). Only Mauricio is shown for now.
+  var FEATURED = ["farniente"];
   var activeFilm = null;
   function setActiveFilm(film){
     if (film === "none") film = null;
