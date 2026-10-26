@@ -6,7 +6,7 @@
 <title>MACHINA — Paris-Born Hybrid AI Creative Collective</title>
 <meta name="description" content="MACHINA is a Paris-born hybrid AI creative collective for luxury image and motion — film, photography, and AI-native production, from concept to final frame." />
 <link rel="canonical" href="https://machinacollective.com/" />
-<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="robots" content="noindex, nofollow" />
 <meta name="theme-color" content="#000000" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=62" />
 <link rel="apple-touch-icon" href="/favicon.svg?v=62" />
@@ -38,8 +38,7 @@
   "logo": "https://machinacollective.com/machina2/img/machina-logo-solid.png",
   "image": "https://machinacollective.com/machina2/img/og-machina.jpg?v=63",
   "description": "MACHINA is a Paris-born hybrid AI creative collective for luxury image and motion — film, photography, and AI-native production, from concept to final frame.",
-  "foundingLocation": "Paris, France",
-  "email": "sabine@ghiblimedia.com"
+  "foundingLocation": "Paris, France"
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
@@ -91,9 +90,8 @@
       radial-gradient(120% 90% at 50% 30%, transparent 42%, rgba(0,0,0,.5) 100%),
       linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 78%, rgba(0,0,0,.5) 100%);
   }
-  /* Global film grain. --grain sets the level; it's raised only for Olga's
-     Collective film (see .grain-boost), whose footage is cleaner than the rest
-     of the collective's, so it sits in the same texture as the others. */
+  /* Global film grain. --grain sets the level; .grain-boost raises it for
+     footage that is cleaner than the rest, so it sits in the same texture. */
   :root{ --grain:.06; --grain-boost:.12; }
   #grain{
     position:fixed; inset:0; z-index:1; pointer-events:none; opacity:var(--grain);
@@ -275,6 +273,11 @@
   .lab-back:hover{opacity:1}
   .lab-eyebrow{padding:calc(var(--pad) + 10vh) var(--pad) 0; margin:0 0 clamp(24px,4vh,52px);
     font-size:clamp(10px,1vw,12px); letter-spacing:.28em; text-transform:uppercase; color:var(--fg-dim); text-align:center}
+  /* Small spec captions: Helvetica caps, regular weight, body text colour at 60% */
+  .lab-note, .lab-tag{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-weight:400; text-transform:uppercase;
+    color:rgba(255,255,255,.6); font-size:clamp(10px,1vw,12px); letter-spacing:.14em; line-height:1.5}
+  .lab-note{margin:calc(-1 * clamp(14px,3vh,40px)) auto clamp(24px,4vh,52px); padding:0 var(--pad); max-width:62ch; text-align:center}
+  .lab-title{display:flex; flex-direction:column; align-items:flex-end; gap:.5em; text-align:right}
   .lab-grid{columns:4 260px; column-gap:clamp(10px,1.2vw,20px); padding:0 var(--pad) calc(var(--pad) + 10vh)}
   @media (max-width:900px){ .lab-grid{columns:3 200px} }
   @media (max-width:620px){ .lab-grid{columns:2 140px} }
@@ -416,13 +419,6 @@
   <video data-film="splashdesat" data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/41a59880-1b42-428f-80f4-4efae0c56450/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="ysl"         data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/3a1076bd-e35c-4881-885d-11c8b3a962c3/playlist.m3u8" muted loop playsinline preload="none"></video>
   <video data-film="lipstick"    data-hls="https://vz-d7ddf2a7-c8e.b-cdn.net/e3160fdb-9322-4218-b2ea-fec87bf5edf7/playlist.m3u8" muted loop playsinline preload="none"></video>
-  <!-- THE COLLECTIVE section, its menu link and its films are removed for now (Oct 2026), so no
-       artist work is reachable. To restore: bring back the section + "Collective" nav link from git
-       history (commit before "Remove the Collective"), plus these films:
-       Mauricio = Far Niente  https://machina-collective.b-cdn.net/scroll-assets/Far_Niente.mp4
-       Olga     = Summer Boredom, Bunny Stream 800de5c4-d4d9-43c8-8d9f-e601a4415204
-       Ghibli   = Tommy Hilfiger, Bunny Stream fd800681-6742-4613-ac48-2e8075837d54
-       The ARTISTS decks below are kept, unreachable. -->
   <div class="tint"></div>
 </div>
 <div id="grain"></div>
@@ -431,6 +427,7 @@
   <a id="navmark" href="#" data-target="hero"><img src="/machina2/img/machina-logo-solid.png" alt="MACHINA"></a>
   <div class="navlinks">
     <a href="#" data-target="whoweare">About</a>
+    <a href="#" data-lab="1">Lab</a>
   </div>
 </nav>
 <div id="progress"></div>
@@ -490,6 +487,19 @@
     </div>
   </section>
 
+  <!-- 10 CAPABILITIES — black -->
+  <section class="sec right" data-film="none">
+    <div class="wrap">
+      <div class="eyebrow reveal">[ → ] Our capabilities</div>
+      <div class="caps">
+        <div class="cap reveal"><h3>Creative Direction</h3><ul><li>Concept Development</li><li>Narrative &amp; World Building</li><li>Campaign Systems</li><li>AI Art Direction</li></ul></div>
+        <div class="cap reveal" style="--i:1"><h3>Hybrid Production</h3><ul><li>360 Executive Hybrid production</li><li>AI Video &amp; Motion</li><li>World building</li><li>Digital Environments</li></ul></div>
+        <div class="cap reveal" style="--i:1"><h3>Content &amp; Visuals</h3><ul><li>Hybrid and AI-only Campaign</li><li>Still &amp; Motion Generation</li><li>Product Visualization</li><li>Model &amp; Talent Systems</li><li>Post: Editing, Color, Retouch</li></ul></div>
+        <div class="cap reveal" style="--i:2"><h3>Systems &amp; Pipeline</h3><ul><li>AI Workflow Design</li><li>Custom Model Training</li><li>Production Pipelines</li><li>Automation &amp; Scaling</li><li>Tool Integration</li></ul></div>
+        <div class="cap reveal" style="--i:2"><h3>Training &amp; Education</h3><ul><li>Corporate Training</li><li>Creative Workshops</li><li>AI for Creative Team</li><li>Workflow Implementation</li></ul></div>
+      </div>
+    </div>
+  </section>
 
   <!-- 12 THE UNIT — founders (larger) on top, team (smaller) below -->
   <!-- (Hero is cloned here by JS so scrolling past the last section wraps seamlessly to the top.) -->
@@ -509,6 +519,7 @@
 <section id="lab" class="lab" aria-hidden="true">
   <button class="lab-back" type="button">[ ← ] Back</button>
   <div class="lab-eyebrow">[ → ] Lab</div>
+  <p class="lab-note">Speculative work. Every person shown is synthetic and not based on any real individual.</p>
   <div class="lab-grid"></div>
 </section>
 <div class="lab-view" aria-hidden="true">
@@ -524,7 +535,6 @@
   <div class="contact-inner">
     <div class="contact-left">
       <div class="contact-eyebrow">Contact</div>
-      <a class="contact-email" href="mailto:sabine@ghiblimedia.com">sabine@ghiblimedia.com</a>
     </div>
     <form class="cform" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field">
       <input type="hidden" name="form-name" value="newsletter">
@@ -563,7 +573,7 @@
   });
   var main = document.querySelector("main");
 
-  // ---- Duplicate all content once so the DOWNWARD loop has runway: when you
+  // ---- Duplicate all content once so the DOWNWARD loop has room to run: when you
   // scroll past the last section you're actually entering an identical second
   // copy, and we teleport back by one copy at the seam (invisible). ----
   var originals = Array.prototype.slice.call(main.children);
@@ -621,14 +631,13 @@
     videos[v.dataset.film] = v; seamlessLoop(v);
     if (v.preload === "auto") v.dataset.warmed = "1";   // eager-loading films need no warming
   });
-  // Collective featured film per focused member (roll order). Only Mauricio is shown for now.
-  var FEATURED = ["farniente"];
+  // Collective featured film per focused member (the Collective is hidden for now).
+  var FEATURED = [];
   var activeFilm = null;
   function setActiveFilm(film){
     if (film === "none") film = null;
     if (film === activeFilm) return;
     activeFilm = film;
-    document.body.classList.toggle("grain-boost", film === "feat_olga");
     for (var k in videos){
       var v = videos[k];
       if (k === film){
@@ -795,30 +804,29 @@
     var meta  = view.querySelector(".lab-meta");
     // Images [file, naturalW, naturalH] + Finals videos. Project derived from the name.
     // Stills are named NN-<project>.jpg; the suffix picks the label shown in fullscreen.
-    var PROJECTS = { loewe:"Loewe", merc:"Mercedes", farniente:"Far Niente" };
+    var PROJECTS = { loewe:"Fashion", merc:"Automotive", farniente:"Far Niente" };
 
+    // Labels: IC = imagined campaign, SC = built around a synthetic (generated) cast, EX = test / R&D.
+    // Pieces showing a real brand mark (06, 08, 12, 15, merc-car, merc-metal, far-niente-1) are out for now.
+    var IC = "Imagined campaign", SC = "Spec. Synthetic cast", EX = "Experiment";
     var ITEMS = [
-      ["01-loewe.jpg",1278,1600],["02-loewe.jpg",1278,1600],["03-merc.jpg",1197,1600],
-      ["04-loewe.jpg",1278,1600],["05-loewe.jpg",1278,1600],["06-merc.jpg",1197,1600],
-      ["08-loewe.jpg",1278,1600],["11-merc.jpg",1197,1600],["12-loewe.jpg",1278,1600],
-      ["13-loewe.jpg",1278,1600],["14-merc.jpg",1197,1600],["15-loewe.jpg",1278,1600],
-      ["17-merc.jpg",1197,1600],["18-farniente.jpg",1279,1600]
+      ["01-loewe.jpg",1278,1600,IC],["02-loewe.jpg",1278,1600,IC],["03-merc.jpg",1197,1600,EX],
+      ["04-loewe.jpg",1278,1600,IC],["05-loewe.jpg",1278,1600,IC],["11-merc.jpg",1197,1600,EX],
+      ["13-loewe.jpg",1278,1600,IC],["14-merc.jpg",1197,1600,EX],["17-merc.jpg",1197,1600,EX],
+      ["18-farniente.jpg",1279,1600,SC]
     ].map(function(a){
-      return { type:"image", thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2],
+      return { type:"image", thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2], label:a[3],
                project:PROJECTS[a[0].replace(/^\d+-|\.jpg$/g, "")] };
     }).concat([
       // [poster-basename, Bunny filename, tileW, tileH, project]. Videos stream from the
       // Bunny "LAB" folder (machina-collective.b-cdn.net/LAB/); posters ship in-repo.
-      ["loewe-donkey","Donkey.mp4",1284,1608,"Loewe"],
-      ["loewe-siesta","La siesta.mp4",1284,1608,"Loewe"],
-      ["merc-tubes","tubes.mp4",1440,810,"Mercedes"],
-      ["merc-car","Mercedes car.mp4",1440,810,"Mercedes"],
-      ["merc-metal","Mercedes-_1.mp4",1440,810,"Mercedes"],
-      ["far-niente-1","Far Niente/Far_Niente_1.mp4",1080,1350,"Far Niente"],
-      ["far-niente-2","Far Niente/Far_Niente_2.mp4",1080,1350,"Far Niente"],
-      ["far-niente-3","Far Niente/Far_Niente_3.mp4",1080,1350,"Far Niente"],
-      ["far-niente-5","Far Niente/Far_Niente_5.mp4",1080,1350,"Far Niente"],
-      ["far-niente-7","Far Niente/Far_Niente_7.mp4",1080,1350,"Far Niente"]
+      ["loewe-donkey","Donkey.mp4",1284,1608,"Fashion",IC],
+      ["loewe-siesta","La siesta.mp4",1284,1608,"Fashion",SC],
+      ["merc-tubes","tubes.mp4",1440,810,"Automotive",EX],
+      ["far-niente-2","Far Niente/Far_Niente_2.mp4",1080,1350,"Far Niente",SC],
+      ["far-niente-3","Far Niente/Far_Niente_3.mp4",1080,1350,"Far Niente",SC],
+      ["far-niente-5","Far Niente/Far_Niente_5.mp4",1080,1350,"Far Niente",IC],
+      ["far-niente-7","Far Niente/Far_Niente_7.mp4",1080,1350,"Far Niente",SC]
     ].map(function(a){
       // Newer uploads sit in per-project subfolders, so encode each path
       // segment rather than the whole string (which would escape the slash).
@@ -826,7 +834,7 @@
                src:"https://machina-collective.b-cdn.net/LAB/" +
                    a[1].split("/").map(function(seg){ return encodeURIComponent(seg); }).join("/"),
                thumb:"/lab/video/"+a[0]+".jpg", full:"/lab/video/"+a[0]+".jpg",
-               w:a[2], h:a[3], project:a[4] };
+               w:a[2], h:a[3], project:a[4], label:a[5] };
     }));
 
     // Build the masonry. Sources are attached on first open (below) rather than
@@ -913,7 +921,7 @@
         var img = new Image(); img.src = it.full; img.alt = "";
         stage.appendChild(img);
       }
-      meta.innerHTML = "<span>[ Creative Spec ]</span><span>" + it.project + "</span>";
+      meta.innerHTML = "<span>[ Creative Spec ]</span><span class=\"lab-title\"><span>" + it.project + "</span><span class=\"lab-tag\">" + it.label + "</span></span>";
       preload(cur+1); preload(cur-1);
     }
     function openView(i){ view.classList.add("open"); view.setAttribute("aria-hidden","false"); show(i); }
@@ -986,7 +994,7 @@
         cnote.className = localPreview ? "cnote" : "cnote err";
         cnote.textContent = localPreview
           ? "Note — signup only works on the live site. You're on the local preview, so this won't send from here."
-          : "Something went wrong. Please email us directly at sabine@ghiblimedia.com.";
+          : "Something went wrong. Please try again later.";
       });
   });
 
@@ -1044,52 +1052,8 @@
   // ---- Artist work deck (opened from the Collective) ----
   var STREAM = "https://vz-d7ddf2a7-c8e.b-cdn.net/";
   function m3u8(g){ return STREAM + g + "/playlist.m3u8"; }
-  var SUSPENDED = { src:"https://machina-collective.b-cdn.net/scroll-assets/suspended.mp4", p:"Suspended", t:"Short Film" };  // shared Mauricio + Olga
-  var ARTISTS = {
-    mauricio: { name:"Mauricio Sierra",
-      bio:{ photo:"/scroll-assets/team/mauricio.jpg", name:"Mauricio Sierra", role:"Director. Founder + Chief Creative Officer.",
-        desc:[
-          "Paris-based director and photographer working across luxury, fashion, and beauty. His foundation is traditional: light, composition, narrative, taste.",
-          "MACHINA is the studio he built to carry that craft into a new era, combining film, photography, and AI-native production into a single creative system. The work is built to scale without losing the eye that made it."
-        ], site:{ label:"mausierra.com", url:"https://www.mausierra.com" }, ig:"https://www.instagram.com/mauricio_sierra_/" },
-      works:[
-      {src:"https://machina-collective.b-cdn.net/scroll-assets/Far_Niente.mp4", poster:"/lab/video/Far_Niente.jpg", p:"Far Niente", t:"Spec Ad"},
-      {src:"https://machina-collective.b-cdn.net/LAB/Jacquemus.mp4", poster:"/lab/video/Jacquemus.jpg", p:"Jacquemus", t:"Spec Ad"},
-      {src:"https://machina-collective.b-cdn.net/LAB/Mercedes-_1.mp4", p:"Mercedes-Benz", t:"Commercial"},
-      {g:"df2f3bca-1321-4ffb-a1ab-b3527f69d5a1", p:"Nothing Special", t:"Short Film"},
-      SUSPENDED,
-      {g:"0b28f942-c81c-448e-98d3-ef8494859606", p:"Layer Zero: The Descent", t:"Short Film"},
-      {g:"1732e792-cf73-4721-bb42-ef0c1c80c2ba", p:"Kilian — Her Majesty", t:"Commercial"},
-      {g:"12b7da7b-3957-448c-a8d8-0f617c8f3989", p:"Valentino Beauty", t:"Advertorial", fit:"contain"},
-      {g:"b54a6565-a184-4207-85af-931d86c25ed6", p:"Love Me Not", t:"Editorial"}
-    ]},
-    olga: { name:"Olga Baranova",
-      bio:{ photo:"/scroll-assets/team/olga.jpg", name:"Olga Baranova", role:"Co-Founder + Creative Technologist",
-        desc:[
-          "Olga Baranova is a creative technologist and filmmaker based in Paris. She worked extensively in high fashion, across artist management and casting, before moving fully into AI-assisted film and commercial production for clients like Qatar Airways, Google, David Beckham's IM8, Samsung, L'Oréal, and Wander, among others. In 2026, she was selected as one of the ten artists globally to take part in Google Flow Sessions.",
-          "She is a creative partner to Google, Flora, and ElevenLabs."
-        ], site:{ label:"olgabrnv.com", url:"https://olgabrnv.com" }, ig:"https://www.instagram.com/olgabrnv/" },
-      works:[
-      {g:"800de5c4-d4d9-43c8-8d9f-e601a4415204", p:"Summer Boredom", t:"Personal Work"},
-      {g:"15775654-ce2f-4dac-b48c-78a6df83a115", p:"Cosmos Field", t:"Personal Work"},
-      {g:"d1959396-28ef-41c4-b019-34b780f09339", p:"Encounter", t:"Personal Work", poster:"https://vz-d7ddf2a7-c8e.b-cdn.net/d1959396-28ef-41c4-b019-34b780f09339/thumbnail.jpg"},
-      {src:"https://olgabrnv-portfolio.b-cdn.net/living-garden.mp4", p:"The Living Garden", t:"Concept Film", poster:"/scroll-assets/posters/living-garden.jpg"},
-      {g:"1af2d717-99d9-4244-b846-00075a87b7c0", p:"Fanal — Google Flow Sessions", t:"Short Film"},
-      SUSPENDED
-    ]},
-    ghibli: { name:"Ghibli Media",
-      bio:{ photo:"/scroll-assets/team/sabine.jpg", name:"Sabine Mañas", role:"Co-Founder + Executive Producer, Ghibli Media",
-        desc:[
-          "GHIBLI MEDIA is a production company headquartered in New York, with producers across several countries. Led by executive producer and production strategist Sabine Mañas, the studio specializes in high-end production across luxury, fashion, and beauty — architecting the ecosystems that carry ambitious creative work from idea to delivery. Its practice lies in translating vision into structure: aligning talent, budgets, timelines, and partners without compromising the integrity of the work. From global campaigns to hybrid productions, they keep the craft intact at every scale."
-        ], site:{ label:"ghiblimedia.com", url:"https://ghiblimedia.com" }, ig:"https://www.instagram.com/ghiblimedia/" },
-      works:[
-      {g:"fd800681-6742-4613-ac48-2e8075837d54", p:"Tommy Hilfiger — Impact", t:"Commercial"},
-      {g:"04bd3578-d6a9-4a27-a882-2e66d4cf96e4", p:"Zegna — Break the Mold", t:"Commercial"},
-      {img:"/scroll-assets/posters/chanel-1.jpg", p:"Chanel N°5", t:"Campaign"},
-      {g:"04e2cd18-f3f5-4a9d-9588-b5934b064757", p:"Lab Series", t:"Commercial"},
-      {g:"0ac2f5bc-41f6-4fdf-9347-b2a74c724538", p:"Sol de Janeiro — Badalada", t:"Commercial"}
-    ]}
-  };
+  // Artist decks are hidden for now (Oct 2026); the full data is in git (tag full-site-oct-2026).
+  var ARTISTS = {};
   var overlay = document.getElementById("artist");
   var oNameC = overlay.querySelector(".artist-name-c");
   var oWorks = overlay.querySelector(".artist-works");
