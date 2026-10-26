@@ -1,3 +1,7 @@
+# HOLDING PAGE: every address shows offline.html (black, MACHINA, noindex).
+# To restore the site, delete this comment and the rule below.
+/*    /offline.html   200!
+
 # Digital business cards — one per person at /card/<name> (e.g. /card/mauricio)
 /card        /card.html   200
 /card/*      /card.html   200
