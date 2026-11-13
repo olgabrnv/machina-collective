@@ -809,11 +809,10 @@
     // Labels: IC = imagined campaign, SC = built around a synthetic (generated) cast, EX = test / R&D.
     // Pieces showing a real brand mark (06, 08, 12, 15, merc-car, merc-metal, far-niente-1) are out for now.
     var IC = "Imagined campaign", SC = "Spec. Synthetic cast", EX = "Experiment";
+    // Stills 01, 02, 04 and 05 are also off for now (Nov 2026).
     var ITEMS = [
-      ["01-loewe.jpg",1278,1600,IC],["02-loewe.jpg",1278,1600,IC],["03-merc.jpg",1197,1600,EX],
-      ["04-loewe.jpg",1278,1600,IC],["05-loewe.jpg",1278,1600,IC],["11-merc.jpg",1197,1600,EX],
-      ["13-loewe.jpg",1278,1600,IC],["14-merc.jpg",1197,1600,EX],["17-merc.jpg",1197,1600,EX],
-      ["18-farniente.jpg",1279,1600,SC]
+      ["03-merc.jpg",1197,1600,EX],["11-merc.jpg",1197,1600,EX],["13-loewe.jpg",1278,1600,IC],
+      ["14-merc.jpg",1197,1600,EX],["17-merc.jpg",1197,1600,EX],["18-farniente.jpg",1279,1600,SC]
     ].map(function(a){
       return { type:"image", thumb:"/lab/thumb/"+a[0], full:"/lab/"+a[0], w:a[1], h:a[2], label:a[3],
                project:PROJECTS[a[0].replace(/^\d+-|\.jpg$/g, "")] };
